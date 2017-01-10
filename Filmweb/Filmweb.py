@@ -36,23 +36,26 @@ class Filmweb:
       for item in r.text.split('\\a'):
          item_data = item.split('\\c')
          item_type = item_data[0]
-         item_id = item_data[1]
-         item_poster = item_data[2][:-6]
-         item_orgname = item_data[3]
-         item_name = item_data[4]
-         item_year = item_data[6]
+         if item_type in ['f', 's', 'g', 'p']:
+            item_id = item_data[1]
+            item_poster = item_data[2][:-6]
+            item_orgname = item_data[3]
+            item_name = item_data[4]
+            item_year = item_data[6]
 
-         if item_type == 'f':
-            item = Film(item_id, item_name, poster = item_poster, name_org = item_orgname, year = item_year)
+            if item_type == 'f':
+               item = Film(item_id, item_name, poster = item_poster, name_org = item_orgname, year = item_year)
 
-         elif item_type == 's':
-            item = Serial(item_id, item_name, poster = item_poster, name_org = item_orgname, year = item_year)
+            elif item_type == 's':
+               item = Serial(item_id, item_name, poster = item_poster, name_org = item_orgname, year = item_year)
 
-         elif item_type == 'g':
-            item = Videogame(item_id, item_name, poster = item_poster, name_org = item_orgname, year = item_year)
+            elif item_type == 'g':
+               item = Videogame(item_id, item_name, poster = item_poster, name_org = item_orgname, year = item_year)
 
-         elif item_type == 'p':
-            item = Person(item_id, item_orgname, poster = item_poster)
+            elif item_type == 'p':
+               item = Person(item_id, item_orgname, poster = item_poster)
+
+         #elif item_type == 't': # TV channel
 
          items.append(item)
 
@@ -98,7 +101,7 @@ class Item:
       item_type = 'film'
       if data[15] == 1:
          item_type = 'serial'
-      elif data[16] == 2:
+      elif data[15] == 2:
          item_type = 'videogame'
 
       data = {
@@ -127,7 +130,7 @@ class Item:
 
 class Film(Item):
    def __init__(self, uid, name=None, poster=None, name_org=None, year=None):
-      super(Film, self).__init__(uid, name, poster=poster, name_org=name_org, year=year)
+      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year)
 
    @property
    def type(self):
@@ -135,7 +138,7 @@ class Film(Item):
 
 class Serial(Item):
    def __init__(self, uid, name=None, poster=None, name_org=None, year=None):
-      super(Serial, self).__init__(uid, name, poster=poster, name_org=name_org, year=year)
+      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year)
 
    @property
    def type(self):
@@ -143,7 +146,7 @@ class Serial(Item):
 
 class Videogame(Item):
    def __init__(self, uid, name=None, poster=None, name_org=None, year=None):
-      super(Videogame, self).__init__(uid, name, poster, name_org)
+      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year)
 
    @property
    def type(self):
