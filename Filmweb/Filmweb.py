@@ -3,6 +3,8 @@ from hashlib import md5
 import json
 import requests
 
+from .utils import *
+
 API_KEY = 'qjcGhW2JnvGT9dfCt3uT_jozR3s'
 URL     = 'http://www.filmweb.pl'
 URL_CDN = 'http://1.fwcdn.pl'
@@ -10,10 +12,8 @@ URL_API = 'https://ssl.filmweb.pl/api'
 
 class Filmweb:
    @staticmethod
-   def _request(method, params):
-      data_str = ''
-      for arg in params:
-         data_str += '{} [{}]\n'.format(method, arg)
+   def _request(method, params=['']):
+      data_str = '{} [{}]\n'.format(method, ','.join(params))
 
       sig = '1.0,'+md5((data_str + 'android' + API_KEY).encode()).hexdigest()
       rparams = {
@@ -23,6 +23,7 @@ class Filmweb:
          'methods': data_str
       }
       r = requests.get(URL_API, params=rparams)
+
       data = r.text.split('\n')
       status = data[0]
       if status == 'ok':
@@ -63,24 +64,39 @@ class Filmweb:
 
       return items
 
-# Poster sizes for film/serial/videogame
-poster_sizes = {
-   'large':  3,
-   'big':    5,
-   'normal': 6,
-   'small':  2,
-   'mini':   4,
-   'tiny':   0,
-   'square': 1
-}
+   @staticmethod
+   def get_popular_films():
+      status, data = Filmweb._request('getPopularFilms')
+
+      films = []
+      for v in data:
+         films.append(Film(name=v[0], year=v[1], rate=v[2], votes=v[3], poster=v[5][:-6], uid=v[6]))
+
+      return films
+
+   @staticmethod
+   def get_top_films(genre):
+      status, data = Filmweb._request('getRankingFilms', ['top_100_films_world', str(genres[genre])])
+
+      results = []
+      for v in data:
+         results.append({
+            'film': Film(v[0], rate=v[1], votes=v[4]),
+            'position': v[2],
+            'position_prev': v[3]
+         })
+
+      return results
 
 class Item:
-   def __init__(self, uid, name=None, poster=None, name_org=None, year=None):
+   def __init__(self, uid, name=None, poster=None, name_org=None, year=None, rate=None, votes=None):
       self.uid = uid
       self.name = name
       self.poster = poster if poster != '' else None
       self.name_org = name_org
       self.year = year
+      self.rate = rate
+      self.votes = votes
 
    def __repr__(self):
       return '<Item id: {} name: {} poster: {}>'.format(self.uid, self.name, self.poster)
@@ -131,27 +147,36 @@ class Item:
          'countries':         data[18].split(','),
          'description_short': data[19]
       }
+
+      # Update object
+      self.name = data['name']
+      self.year = data['year']
+      self.rate = data['rate']
+      self.votes = data['votes']
+      if data['poster_small']:
+         self.poster = data['poster_small'][:-6]
+
       return data
 
 class Film(Item):
-   def __init__(self, uid, name=None, poster=None, name_org=None, year=None):
-      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year)
+   def __init__(self, uid, name=None, poster=None, name_org=None, year=None, rate=None, votes=None):
+      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year, rate=rate, votes=votes)
 
    @property
    def type(self):
       return 'film'
 
 class Serial(Item):
-   def __init__(self, uid, name=None, poster=None, name_org=None, year=None):
-      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year)
+   def __init__(self, uid, name=None, poster=None, name_org=None, year=None, rate=None, votes=None):
+      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year, rate=rate, votes=votes)
 
    @property
    def type(self):
       return 'serial'
 
 class Videogame(Item):
-   def __init__(self, uid, name=None, poster=None, name_org=None, year=None):
-      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year)
+   def __init__(self, uid, name=None, poster=None, name_org=None, year=None, rate=None, votes=None):
+      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year, rate=rate, votes=votes)
 
    @property
    def type(self):
@@ -170,19 +195,13 @@ class Person:
    @property
    def url(self):
       if self.name:
-         return '{}/person/{}'.format(URL, self.name.replace(' ', '.'))
+         return '{}/person/{}'.format(URL, self.name.replace(' ', '.').replace('?', ''))
       else:
          return '{}/entityLink?entityName={}&id={}'.format(URL, self.type, self.uid)
 
    def get_poster(self, size='small'):
       if self.poster:
          return '{}/p{}.{}.jpg'.format(URL_CDN, self.poster, 0 if size == 'tiny' else 1)
-
-channel_icon_sizes = {
-   'small':  0,
-   'medium': 1,
-   'big':    2
-}
 
 class Channel:
    def __init__(self, uid, name=None):
