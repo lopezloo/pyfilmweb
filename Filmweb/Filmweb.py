@@ -75,8 +75,8 @@ class Filmweb:
       return films
 
    @staticmethod
-   def get_top_films(genre):
-      status, data = Filmweb._request('getRankingFilms', ['top_100_films_world', str(genres[genre])])
+   def get_top_films(genre, worldwide=True):
+      status, data = Filmweb._request('getRankingFilms', ['top_100_films_' + ('world' if worldwide else 'poland'), str(genres[genre])])
 
       results = []
       for v in data:
