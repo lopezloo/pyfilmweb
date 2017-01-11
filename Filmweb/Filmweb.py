@@ -34,14 +34,15 @@ class Filmweb:
 
       items = []
       for item in r.text.split('\\a'):
-         item_data = item.split('\\c')
-         item_type = item_data[0]
+         data = item.split('\\c')
+         print(str(data).encode('utf-8'))
+         item_type = data[0]
+         item_id = data[1]
+         item_poster = data[2][:-6]
          if item_type in ['f', 's', 'g', 'p']:
-            item_id = item_data[1]
-            item_poster = item_data[2][:-6]
-            item_orgname = item_data[3]
-            item_name = item_data[4]
-            item_year = item_data[6]
+            item_orgname = data[3]
+            item_name = data[4]
+            item_year = data[6]
 
             if item_type == 'f':
                item = Film(item_id, item_name, poster = item_poster, name_org = item_orgname, year = item_year)
@@ -55,7 +56,8 @@ class Filmweb:
             elif item_type == 'p':
                item = Person(item_id, item_orgname, poster = item_poster)
 
-         #elif item_type == 't': # TV channel
+         elif item_type == 't':
+            item = Channel(data[1], data[2])
 
          items.append(item)
 
@@ -85,7 +87,10 @@ class Item:
 
    @property
    def url(self):
-      return '{}/{}/{}-{}-{}'.format(URL, self.type, self.name.replace(' ', '+') if self.name else 'A', self.year or '0000', self.uid)
+      if self.name and self.year:
+         return '{}/{}/{}-{}-{}'.format(URL, self.type, self.name.replace(' ', '+'), self.year, self.uid)
+      else:
+         return '{}/entityLink?entityName={}&id={}'.format(URL, self.type, self.uid)
 
    def get_poster(self, size='small'):
       if self.poster:
@@ -108,7 +113,7 @@ class Item:
          'name':              data[0],
          'name_org':          data[1],
          'rate':              data[2],
-         'voters':            data[3],
+         'votes':             data[3],
          'genres':            data[4].split(','),
          'year':              data[5],
          'duration':          data[6],
@@ -159,9 +164,41 @@ class Person:
       self.poster = poster
 
    @property
+   def type(self):
+      return 'person'
+
+   @property
    def url(self):
-      return '{}/person/{}'.format(URL, self.name.replace(' ', '.'))
+      if self.name:
+         return '{}/person/{}'.format(URL, self.name.replace(' ', '.'))
+      else:
+         return '{}/entityLink?entityName={}&id={}'.format(URL, self.type, self.uid)
 
    def get_poster(self, size='small'):
       if self.poster:
          return '{}/p{}.{}.jpg'.format(URL_CDN, self.poster, 0 if size == 'tiny' else 1)
+
+channel_icon_sizes = {
+   'small':  0,
+   'medium': 1,
+   'big':    2
+}
+
+class Channel:
+   def __init__(self, uid, name=None):
+      self.uid = uid
+      self.name = name
+
+   @property
+   def type(self):
+      return 'channel'
+
+   @property
+   def url(self):
+      if self.name:
+         return '{}/program-tv/{}'.format(URL, self.name.replace(' ', '+'))
+      else:
+         return '{}/entityLink?entityName={}&id={}'.format(URL, self.type, self.uid)
+
+   def get_icon(self, size='small'):
+      return '{}/channels/{}.{}.png'.format(URL_CDN, self.uid, channel_icon_sizes[size])
