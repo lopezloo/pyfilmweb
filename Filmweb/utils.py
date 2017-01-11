@@ -17,7 +17,8 @@ channel_icon_sizes = {
    'big':    2
 }
 
-genres = {
+# Film, serial genres
+film_genres = {
    'Akcja' : 28,
    'Animacja' : 2,
    'Anime' : 66,
@@ -85,3 +86,54 @@ genres = {
    'Wojenny' : 26,
    'XXX' : 71,
 }
+
+# Game genres
+game_genres = {
+   'Przygodowa': 1,
+   'Zręcznościowa': 2,
+   'TPP': 3,
+   'RPG': 4,
+   'FPP': 5,
+   'FPS': 6,
+   'RTS': 7,
+   'Strategia': 8,
+   'Platformowa': 9,
+   'Familijna': 10,
+   'Wyścigi': 11,
+   'TPP/FPS': 12,
+   'Filmowa': 13,
+   'Shooter': 14,
+   'Survival Horror': 15,
+   'Bijatyka': 16,
+   'Sportowa': 17,
+   'Ekonomiczna': 18,
+   'Symulator': 19,
+   'MMORPG': 20,
+   'Skradanka': 21,
+   'Edukacyjna': 22,
+   'Logiczna': 23,
+   'Turowa': 24,
+   'Quiz': 25,
+   'Planszowa': 26,
+   'Taktyczna': 27,
+   'Hazard': 28,
+   'Tekstowa': 29,
+   'Dla dzieci': 30,
+   'Pornografia': 31,
+   'Akcja': 32,
+   'TPS': 33,
+   'Muzyczna': 34,
+   'Menedżer': 35,
+   'Sieciowa': 36,
+   'Fitness': 37,
+   'Taneczna': 38,
+}
+
+def get_genre_id(item_type, genre_name):
+   if item_type == 'film' or item_type == 'serial':
+      container = film_genres
+   elif item_type == 'videogame':
+      container = game_genres
+
+   if genre_name in container:
+      return container[genre_name]

@@ -75,13 +75,35 @@ class Filmweb:
       return films
 
    @staticmethod
-   def get_top_films(genre, worldwide=True):
-      status, data = Filmweb._request('getRankingFilms', ['top_100_films_' + ('world' if worldwide else 'poland'), str(genres[genre])])
+   def get_top(item_type, genre, worldwide=True):
+      assert item_type in ['film', 'serial', 'videogame']
+      assert isinstance(genre, str)
+      assert isinstance(worldwide, bool)
+
+      # Game genre is sadly ignored
+      genre_id = get_genre_id(item_type, genre)
+      if not genre_id:
+         return False
+
+      # Same as country option
+      if item_type == 'videogame' and not worldwide:
+         return False
+
+      req = 'top_100_{}s_{}'.format('game' if item_type == 'videogame' else item_type, 'world' if worldwide else 'poland')
+      status, data = Filmweb._request('getRankingFilms', [req, str(genre_id)])
 
       results = []
       for v in data:
+         item = None
+         if item_type == 'film':
+            item = Film(v[0], rate=v[1], votes=v[4])
+         elif item_type == 'serial':
+            item = Serial(v[0], rate=v[1], votes=v[4])
+         elif item_type == 'videogame':
+            item = Videogame(v[0], rate=v[1], votes=v[4])
+
          results.append({
-            'film': Film(v[0], rate=v[1], votes=v[4]),
+            'item': item,
             'position': v[2],
             'position_prev': v[3]
          })
