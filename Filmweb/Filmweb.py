@@ -75,6 +75,16 @@ class Filmweb:
       return films
 
    @staticmethod
+   def get_popular_persons():
+      status, data = Filmweb._request('getPopularPersons')
+
+      persons = []
+      for v in data:
+         persons.append(Person(v[0], v[1], v[2][:-6]))
+
+      return persons
+
+   @staticmethod
    def get_top(item_type, genre, worldwide=True):
       assert item_type in ['film', 'serial', 'videogame']
       assert isinstance(genre, str)
