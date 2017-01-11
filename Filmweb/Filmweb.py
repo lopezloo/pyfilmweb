@@ -215,10 +215,12 @@ class Videogame(Item):
       return 'videogame'
 
 class Person:
-   def __init__(self, uid, name=None, poster=None):
+   def __init__(self, uid, name=None, poster=None, rate=None, votes=None):
       self.uid = uid
       self.name = name
       self.poster = poster
+      self.rate = rate
+      self.votes = votes
 
    @property
    def type(self):
@@ -234,6 +236,32 @@ class Person:
    def get_poster(self, size='small'):
       if self.poster:
          return '{}/p{}.{}.jpg'.format(URL_CDN, self.poster, 0 if size == 'tiny' else 1)
+
+   def get_info(self):
+      status, data = Filmweb._request('getPersonInfoFull', [self.uid])
+
+      result = {
+         'name': data[0],
+         'birth_date': data[1],
+         'birth_place': data[2],
+         'votes': data[3],
+         'rate': data[4],
+         'poster': data[5][:-6] if data[5] else None,
+         'has_bio': data[6],
+         'film_known_for': Film(uid=data[7]) if data[7] else None,
+         'sex': data[8],
+         'name_full': data[9],
+         'death_date': data[10],
+         'height': data[11],
+      }
+
+      # Update object
+      self.name = result['name']
+      self.poster = result['poster']
+      self.rate = result['rate']
+      self.votes = result['votes']
+
+      return result
 
 class Channel:
    def __init__(self, uid, name=None):
