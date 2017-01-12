@@ -137,3 +137,20 @@ def get_genre_id(item_type, genre_name):
 
    if genre_name in container:
       return container[genre_name]
+
+person_role_types = {
+   'Reżyseria': 1,
+   'Scenariusz': 2,
+   'Muzyka': 3,
+   'Zdjęcia': 4,
+   'Na podstawie': 5,
+   'Aktorzy': 6,
+  #'Aktorzy': 7, # same as 6? 
+  #'Aktorzy': 8, # same as 6?
+   'Produkcja': 9,
+   'Montaż': 10,
+}
+
+def get_role_type_id(role_name):
+   if role_name in person_role_types:
+      return person_role_types[role_name]

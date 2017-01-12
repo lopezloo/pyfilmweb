@@ -13,6 +13,7 @@ URL_API = 'https://ssl.filmweb.pl/api'
 class Filmweb:
    @staticmethod
    def _request(method, params=['']):
+      params = [str(v) for v in params]
       data_str = '{} [{}]\n'.format(method, ','.join(params))
 
       sig = '1.0,'+md5((data_str + 'android' + API_KEY).encode()).hexdigest()
@@ -28,6 +29,7 @@ class Filmweb:
       status = data[0]
       if status == 'ok':
          return status, json.loads(data[1][:-7])
+      return status
 
    @staticmethod
    def search(text):
@@ -190,6 +192,21 @@ class Item:
 
       return data
 
+   def get_persons(self, role_type, offset=0, limit=50):
+      assert role_type in person_role_types
+      assert isinstance(offset, int)
+      assert isinstance(limit, int)
+      status, data = Filmweb._request('getFilmPersons', [self.uid, get_role_type_id(role_type), offset, limit])
+
+      results = []
+      for v in data:
+         results.append({
+            'person': Person(uid=v[0], name=v[3], poster=v[4][:-6] if v[4] else None),
+            'role': v[1],
+            'role_extra_info': v[2]
+         })
+      return results
+
 class Film(Item):
    def __init__(self, uid, name=None, poster=None, name_org=None, year=None, rate=None, votes=None):
       Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year, rate=rate, votes=votes)
@@ -216,7 +233,8 @@ class Videogame(Item):
 
    def get_platforms(self):
       status, data = Filmweb._request('getGameInfo', [self.uid])
-      return data[0].split(', ')
+      if data:
+         return data[0].split(', ')
 
 class Person:
    def __init__(self, uid, name=None, poster=None, rate=None, votes=None):
