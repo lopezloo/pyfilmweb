@@ -84,7 +84,7 @@ film_genres = {
    'Thriller' : 24,
    'Western' : 25,
    'Wojenny' : 26,
-   'XXX' : 71,
+   'XXX' : 71
 }
 
 # Game genres
@@ -126,7 +126,7 @@ game_genres = {
    'Menedżer': 35,
    'Sieciowa': 36,
    'Fitness': 37,
-   'Taneczna': 38,
+   'Taneczna': 38
 }
 
 def get_genre_id(item_type, genre_name):
@@ -148,9 +148,16 @@ person_role_types = {
   #'Aktorzy': 7, # same as 6? 
   #'Aktorzy': 8, # same as 6?
    'Produkcja': 9,
-   'Montaż': 10,
+   'Montaż': 10
 }
 
 def get_role_type_id(role_name):
    if role_name in person_role_types:
       return person_role_types[role_name]
+
+image_sizes = {
+   'small': 0,
+   'big': 1,
+   'square': 2,
+   'medium': 3
+}

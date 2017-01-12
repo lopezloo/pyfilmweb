@@ -38,7 +38,6 @@ class Filmweb:
       items = []
       for item in r.text.split('\\a'):
          data = item.split('\\c')
-         print(str(data).encode('utf-8'))
          item_type = data[0]
          item_id = data[1]
          item_poster = data[2][:-6]
@@ -192,10 +191,10 @@ class Item:
 
       return data
 
-   def get_persons(self, role_type, offset=0, limit=50):
+   def get_persons(self, role_type, offset=0):
       assert role_type in person_role_types
       assert isinstance(offset, int)
-      assert isinstance(limit, int)
+      limit = 50 # Sadly ignored
       status, data = Filmweb._request('getFilmPersons', [self.uid, get_role_type_id(role_type), offset, limit])
 
       results = []
@@ -205,6 +204,21 @@ class Item:
             'role': v[1],
             'role_extra_info': v[2]
          })
+      return results
+
+   def get_images(self, offset=0):
+      limit = 100 # ignored
+      status, data = Filmweb._request('getFilmImages', [self.uid, offset, limit])
+      results = []
+      for v in data:
+         persons = []
+         # If this image has marked persons on it
+         if v[1]:
+            for pdata in v[1]:
+               persons.append(Person(uid=pdata[0], name=pdata[1], poster=pdata[2][:-6] if pdata[2] else None))
+
+         results.append(Image(path=v[0][:-6], sources=v[2], associated_item=self, persons=persons))
+
       return results
 
 class Film(Item):
@@ -290,6 +304,23 @@ class Person:
 
       return result
 
+   def get_images(self, offset=0):
+      limit = 100 # ignored
+      status, data = Filmweb._request('getPersonImages', [self.uid, offset, limit])
+
+      results = []
+      for v in data:
+         persons = []
+         # If this image has marked persons on it
+         if v[1]:
+            for pdata in v[1]:
+               persons.append(Person(uid=pdata[0], name=pdata[1], poster=pdata[2][:-6] if pdata[2] else None))
+
+         results.append(Image(path=v[0][:-6], sources=v[2], associated_item=Item(uid=v[3], name=v[4]), persons=persons))
+
+      return results
+
+
 class Channel:
    def __init__(self, uid, name=None):
       self.uid = uid
@@ -308,3 +339,13 @@ class Channel:
 
    def get_icon(self, size='small'):
       return '{}/channels/{}.{}.png'.format(URL_CDN, self.uid, channel_icon_sizes[size])
+
+class Image:
+   def __init__(self, path, associated_item=None, persons=[], sources=[]):
+      self.path = path
+      self.associated_item = associated_item
+      self.persons = persons
+      self.sources = sources
+
+   def get_url(self, size='medium'):
+      return '{}/ph{}.{}.jpg'.format(URL_CDN, self.path, image_sizes[size])
