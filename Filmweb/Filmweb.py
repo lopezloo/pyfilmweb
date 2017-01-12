@@ -237,6 +237,11 @@ class Person:
       if self.poster:
          return '{}/p{}.{}.jpg'.format(URL_CDN, self.poster, 0 if size == 'tiny' else 1)
 
+   def get_biography(self):
+      status, data = Filmweb._request('getPersonBiography', [self.uid])
+      if data:
+         return data[0]
+
    def get_info(self):
       status, data = Filmweb._request('getPersonInfoFull', [self.uid])
 
