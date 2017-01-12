@@ -214,6 +214,10 @@ class Videogame(Item):
    def type(self):
       return 'videogame'
 
+   def get_platforms(self):
+      status, data = Filmweb._request('getGameInfo', [self.uid])
+      return data[0].split(', ')
+
 class Person:
    def __init__(self, uid, name=None, poster=None, rate=None, votes=None):
       self.uid = uid
