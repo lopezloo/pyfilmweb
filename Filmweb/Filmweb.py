@@ -9,8 +9,10 @@ from Filmweb.Image import *
 from Filmweb.Person import *
 from Filmweb import common
 
+from datetime import date
+
 def _request(method, params=['']):
-   params = [str(v) for v in params]
+   params = [str(v or 'null') for v in params]
    data_str = '{} [{}]\n'.format(method, ','.join(params))
 
    sig = '1.0,'+md5((data_str + 'android' + common.API_KEY).encode()).hexdigest()
@@ -43,16 +45,16 @@ def search(text):
          item_year = data[6]
 
          if item_type == 'f':
-            item = Film(item_id, type='film', item_name, poster = item_poster, name_org = item_orgname, year = item_year)
+            item = Film(item_id, 'film', item_name, poster=item_poster, name_org=item_orgname, year=item_year)
 
          elif item_type == 's':
-            item = Film(item_id, type='serial', item_name, poster = item_poster, name_org = item_orgname, year = item_year)
+            item = Film(item_id, 'serial', item_name, poster=item_poster, name_org=item_orgname, year=item_year)
 
          elif item_type == 'g':
-            item = Film(item_id, type='videogame', item_name, poster = item_poster, name_org = item_orgname, year = item_year)
+            item = Film(item_id, 'videogame', item_name, poster=item_poster, name_org=item_orgname, year=item_year)
 
          elif item_type == 'p':
-            item = Person(item_id, item_orgname, poster = item_poster)
+            item = Person(item_id, item_orgname, poster=item_poster)
 
       elif item_type == 't':
          item = Channel(data[1], data[2])
@@ -98,18 +100,32 @@ def get_top(film_type, genre, worldwide=True):
 
    results = []
    for v in data:
-      film = None
-      if film_type == 'film':
-         film = Film(v[0], type=film_type, rate=v[1], votes=v[4])
-      elif film_type == 'serial':
-         film = Film(v[0], type=film_type, rate=v[1], votes=v[4])
-      elif film_type == 'videogame':
-         film = Film(v[0], type=film_type, rate=v[1], votes=v[4])
-
       results.append({
-         'film': film,
+         'film': Film(v[0], type=film_type, rate=v[1], votes=v[4]),
          'position': v[2],
          'position_prev': v[3]
       })
+
+   return results
+
+def get_upcoming_films(above_date=None):
+   # Nice typo, Filmweb!
+   status, data = Filmweb._request('getUpcommingFilms', [above_date])
+
+   results = []
+   for day in data:
+      films = []
+      for v in day[1]:
+         films.append({
+            'film': Film(uid=v[0], name=v[1], year=v[2], poster=v[3][:-6] if v[3] else None),
+            'person_names': [v[4], v[5]]
+         })
+
+      d = day[0].split('-')
+      result = {
+         'date': date(int(d[0]), int(d[1]), int(d[2])),
+         'films': films
+      }
+      results.append(result)
 
    return results

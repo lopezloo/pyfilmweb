@@ -2,9 +2,9 @@
 from Filmweb import Filmweb, common
 
 class Film:
-   def __init__(self, uid, type = 'unknown', name=None, poster=None, name_org=None, year=None, rate=None, votes=None, duration=None):
+   def __init__(self, uid, type='unknown', name=None, poster=None, name_org=None, year=None, rate=None, votes=None, duration=None):
       self.uid = uid
-      self.type = ftype
+      self.type = type
       self.name = name
       self.poster = poster if poster != '' else None
       self.name_org = name_org
