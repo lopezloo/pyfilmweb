@@ -12,7 +12,7 @@ def _request(method, params=['']):
    params = [str(v) for v in params]
    data_str = '{} [{}]\n'.format(method, ','.join(params))
 
-   sig = '1.0,'+md5((data_str + 'android' + API_KEY).encode()).hexdigest()
+   sig = '1.0,'+md5((data_str + 'android' + common.API_KEY).encode()).hexdigest()
    rparams = {
       'version': 1.0,
       'appId': 'android',

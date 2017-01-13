@@ -2,7 +2,7 @@
 from Filmweb import Filmweb, common
 
 class Item:
-   def __init__(self, uid, name=None, poster=None, name_org=None, year=None, rate=None, votes=None):
+   def __init__(self, uid, name=None, poster=None, name_org=None, year=None, rate=None, votes=None, duration=None):
       self.uid = uid
       self.name = name
       self.poster = poster if poster != '' else None
@@ -10,6 +10,7 @@ class Item:
       self.year = year
       self.rate = rate
       self.votes = votes
+      self.duration = duration
 
    def __repr__(self):
       return '<Item id: {} name: {} poster: {}>'.format(self.uid, self.name, self.poster)
@@ -66,6 +67,7 @@ class Item:
       self.year = result['year']
       self.rate = result['rate']
       self.votes = result['votes']
+      self.duration = result['duration']
       if result['poster_small']:
          self.poster = result['poster_small'][:-6]
 

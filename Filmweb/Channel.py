@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from Filmweb import common
+from Filmweb import Filmweb, common
+from Filmweb.Item import *
 
 class Channel:
    def __init__(self, uid, name=None):
@@ -20,3 +21,19 @@ class Channel:
 
    def get_icon(self, size='small'):
       return '{}/channels/{}.{}.png'.format(common.URL_CDN, self.uid, common.channel_icon_sizes[size])
+
+   # date: max +13, min -1 days
+   def get_schedule(self, date):
+      status, data = Filmweb._request('getTvSchedule', [self.uid, str(date)])
+
+      results = []
+      for v in data:
+         results.append({
+            'uid': v[0],
+            'title': v[1],
+            'description': v[2],
+            'time': v[3], # HH-MM
+            'type': v[4],
+            'item': Item(uid=v[5], name=v[1], year=v[6], duration=v[7], poster=v[8][:-6] if v[8] else None) if v[5] else None
+         })
+      return results
