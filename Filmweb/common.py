@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+API_KEY = 'qjcGhW2JnvGT9dfCt3uT_jozR3s'
+URL     = 'http://www.filmweb.pl'
+URL_CDN = 'http://1.fwcdn.pl'
+URL_API = 'https://ssl.filmweb.pl/api'
+
 # Poster sizes for film/serial/videogame
 poster_sizes = {
    'large':  3,
