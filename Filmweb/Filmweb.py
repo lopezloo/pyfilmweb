@@ -158,7 +158,7 @@ class Item:
       elif data[15] == 2:
          item_type = 'videogame'
 
-      data = {
+      result = {
          'name':              data[0],
          'name_org':          data[1],
          'rate':              data[2],
@@ -166,10 +166,10 @@ class Item:
          'genres':            data[4].split(','),
          'year':              data[5],
          'duration':          data[6],
-        #'unk':               data[7],
+        #'comments_count':    data[7], # leftover, always 0
          'discussion_url':    data[8],
-        #'unk':               data[9],
-        #'unk':               data[10],
+         'has_review':        data[9],
+         'has_description':   data[10],
          'poster_small':      data[11],
          'trailers':          data[12],
          'premiere':          data[13], # YYYY-MM-DD
@@ -182,14 +182,14 @@ class Item:
       }
 
       # Update object
-      self.name = data['name']
-      self.year = data['year']
-      self.rate = data['rate']
-      self.votes = data['votes']
-      if data['poster_small']:
-         self.poster = data['poster_small'][:-6]
+      self.name = result['name']
+      self.year = result['year']
+      self.rate = result['rate']
+      self.votes = result['votes']
+      if result['poster_small']:
+         self.poster = result['poster_small'][:-6]
 
-      return data
+      return result
 
    def get_persons(self, role_type, offset=0):
       assert role_type in person_role_types
