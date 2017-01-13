@@ -6,8 +6,6 @@ import requests
 from Filmweb.Items import *
 from Filmweb import common
 
-from datetime import date
-
 def _request(method, params=['']):
    params = [str(v if v is not None else 'null') for v in params]
    data_str = '{} [{}]\n'.format(method, ','.join(params))
@@ -116,11 +114,17 @@ def get_upcoming_films(above_date=None):
             'person_names': [v[4], v[5]]
          })
 
-      d = day[0].split('-')
       result = {
-         'date': date(int(d[0]), int(d[1]), int(d[2])),
+         'date': common.str_to_date(day[0]),
          'films': films
       }
       results.append(result)
 
+   return results
+
+def get_born_today_persons():
+   status, data = Filmweb._request('getBornTodayPersons')
+   results = []
+   for v in data:
+      results.append(Person(uid=v[0], name=v[1], poster=v[2][:-6] if v[2] else None, date_birth=common.str_to_date(v[3]), date_death=common.str_to_date(v[4])))
    return results

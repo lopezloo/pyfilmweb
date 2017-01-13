@@ -109,12 +109,14 @@ class Film:
          return data[0].split(', ')
 
 class Person:
-   def __init__(self, uid, name=None, poster=None, rate=None, votes=None):
+   def __init__(self, uid, name=None, poster=None, rate=None, votes=None, date_birth=None, date_death=None):
       self.uid = uid
       self.name = name
       self.poster = poster
       self.rate = rate
       self.votes = votes
+      self.date_birth = date_birth
+      self.date_death = date_death
 
    @property
    def type(self):
@@ -141,8 +143,8 @@ class Person:
 
       result = {
          'name': data[0],
-         'birth_date': data[1],
-         'birth_place': data[2],
+         'birth_date': common.str_to_date(data[1]),
+         'birth_place': common.str_to_date(data[2]),
          'votes': data[3],
          'rate': data[4],
          'poster': data[5][:-6] if data[5] else None,
@@ -159,6 +161,8 @@ class Person:
       self.poster = result['poster']
       self.rate = result['rate']
       self.votes = result['votes']
+      self.date_birth = result['birth_date']
+      self.date_death = result['death_date']
 
       return result
 

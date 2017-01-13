@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
+
 API_KEY = 'qjcGhW2JnvGT9dfCt3uT_jozR3s'
 URL     = 'http://www.filmweb.pl'
 URL_CDN = 'http://1.fwcdn.pl'
@@ -150,8 +152,8 @@ person_role_types = {
    'Operator zdjęć': 4,
    'Na podstawie': 5,
    'Aktor': 6,
-  #'Aktorzy': 7, # same as 6? 
-  #'Aktorzy': 8, # same as 6?
+  #'Aktor': 7, # same as 6? 
+  #'Aktor': 8, # same as 6?
    'Producent': 9,
    'Montażysta': 10
 }
@@ -179,3 +181,7 @@ def get_film_type_id(film_name):
 
 def get_film_type_name(film_id):
    return film_types[film_id]
+
+def str_to_date(s):
+   if s:
+      return datetime.strptime(s, '%Y-%m-%d').date()
