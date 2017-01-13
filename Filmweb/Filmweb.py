@@ -3,16 +3,13 @@ from hashlib import md5
 import json
 import requests
 
-from Filmweb.Film import *
-from Filmweb.Channel import *
-from Filmweb.Image import *
-from Filmweb.Person import *
+from Filmweb.Items import *
 from Filmweb import common
 
 from datetime import date
 
 def _request(method, params=['']):
-   params = [str(v or 'null') for v in params]
+   params = [str(v if v is not None else 'null') for v in params]
    data_str = '{} [{}]\n'.format(method, ','.join(params))
 
    sig = '1.0,'+md5((data_str + 'android' + common.API_KEY).encode()).hexdigest()
@@ -81,22 +78,20 @@ def get_popular_persons():
 
    return persons
 
-def get_top(film_type, genre, worldwide=True):
+def get_top(film_type, genre=None, worldwide=True):
    assert film_type in common.film_types
    assert isinstance(genre, str)
    assert isinstance(worldwide, bool)
 
    # Game genre is sadly ignored
-   genre_id = common.get_genre_id(film_type, genre)
-   if not genre_id:
-      return False
+   genre_id = common.get_genre_id(film_type, genre) if genre else None
 
    # Same as country option
    if film_type == 'videogame' and not worldwide:
       return False
 
    req = 'top_100_{}s_{}'.format('game' if film_type == 'videogame' else film_type, 'world' if worldwide else 'poland')
-   status, data = Filmweb._request('getRankingFilms', [req, str(genre_id)])
+   status, data = Filmweb._request('getRankingFilms', [req, genre_id])
 
    results = []
    for v in data:
