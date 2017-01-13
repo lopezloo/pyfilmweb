@@ -6,9 +6,9 @@ import requests
 from Filmweb.Items import *
 from Filmweb import common
 
-def _request(method, params=['']):
-   params = [str(v if v is not None else 'null') for v in params]
-   data_str = '{} [{}]\n'.format(method, ','.join(params))
+def _request(method, params=[]):
+   params = [v if v is not None else 'null' for v in params]
+   data_str = '{} {}\n'.format(method, str(params))
 
    sig = '1.0,'+md5((data_str + 'android' + common.API_KEY).encode()).hexdigest()
    rparams = {

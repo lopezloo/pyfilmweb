@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from Filmweb import Filmweb, common
+from datetime import datetime
 
 class Film:
    def __init__(self, uid, type='unknown', name=None, poster=None, name_org=None, year=None, rate=None, votes=None, duration=None):
@@ -15,7 +16,7 @@ class Film:
       self.duration = duration
 
    def __repr__(self):
-      return '<Film id: {} name: {} poster: {}>'.format(self.uid, self.name, self.poster)
+      return '<Film uid: {} type: {} name: {}>'.format(self.uid, self.type, self.name)
 
    @property
    def url(self):
@@ -87,7 +88,7 @@ class Film:
 
    def get_images(self, offset=0):
       limit = 100 # ignored
-      status, data = Filmweb._request('getFilmImages', [self.uid, offset, limit])
+      status, data = Filmweb._request('getFilmImages', [[self.uid, offset, limit]])
       results = []
       for v in data:
          persons = []
@@ -107,6 +108,23 @@ class Film:
       status, data = Filmweb._request('getGameInfo', [self.uid])
       if data:
          return data[0].split(', ')
+
+   def get_broadcasts(self):
+      # Seems to be ignored
+      offset = 0
+      limit = 100
+
+      status, data = Filmweb._request('getFilmsNearestBroadcasts', [[self.uid, offset, limit]])
+
+      results = []
+      for v in data:
+         results.append({
+            'channel': Channel(uid=v[1]),
+            'datetime': datetime.strptime(v[3]+v[2], '%Y-%m-%d%H:%M'),
+            'uid': v[4]
+         })
+
+      return results
 
 class Person:
    def __init__(self, uid, name=None, poster=None, rate=None, votes=None, date_birth=None, date_death=None):
@@ -225,6 +243,9 @@ class Channel:
    def __init__(self, uid, name=None):
       self.uid = uid
       self.name = name
+
+   def __repr__(self):
+      return '<Channel uid: {} name: {}>'.format(self.uid, self.name)
 
    @property
    def type(self):
