@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from Filmweb import Filmweb, common
+from Filmweb.Film import *
 
 class Person:
    def __init__(self, uid, name=None, poster=None, rate=None, votes=None):
@@ -67,6 +68,6 @@ class Person:
             for pdata in v[1]:
                persons.append(Person(uid=pdata[0], name=pdata[1], poster=pdata[2][:-6] if pdata[2] else None))
 
-         results.append(Image(path=v[0][:-6], sources=v[2], associated_item=Item(uid=v[3], name=v[4]), persons=persons))
+         results.append(Image(path=v[0][:-6], sources=v[2], associated_film=Film(uid=v[3], name=v[4]), persons=persons))
 
       return results

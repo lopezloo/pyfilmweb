@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from Filmweb import Filmweb, common
-from Filmweb.Item import *
+from Filmweb.Film import *
 
 class Channel:
    def __init__(self, uid, name=None):
@@ -34,6 +34,6 @@ class Channel:
             'description': v[2],
             'time': v[3], # HH-MM
             'type': v[4],
-            'item': Item(uid=v[5], name=v[1], year=v[6], duration=v[7], poster=v[8][:-6] if v[8] else None) if v[5] else None
+            'film': Film(uid=v[5], name=v[1], year=v[6], duration=v[7], poster=v[8][:-6] if v[8] else None) if v[5] else None
          })
       return results

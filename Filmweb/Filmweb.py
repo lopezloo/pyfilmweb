@@ -3,9 +3,10 @@ from hashlib import md5
 import json
 import requests
 
-from Filmweb.Item import *
+from Filmweb.Film import *
 from Filmweb.Channel import *
 from Filmweb.Image import *
+from Filmweb.Person import *
 from Filmweb import common
 
 def _request(method, params=['']):
@@ -42,13 +43,13 @@ def search(text):
          item_year = data[6]
 
          if item_type == 'f':
-            item = Film(item_id, item_name, poster = item_poster, name_org = item_orgname, year = item_year)
+            item = Film(item_id, type='film', item_name, poster = item_poster, name_org = item_orgname, year = item_year)
 
          elif item_type == 's':
-            item = Serial(item_id, item_name, poster = item_poster, name_org = item_orgname, year = item_year)
+            item = Film(item_id, type='serial', item_name, poster = item_poster, name_org = item_orgname, year = item_year)
 
          elif item_type == 'g':
-            item = Videogame(item_id, item_name, poster = item_poster, name_org = item_orgname, year = item_year)
+            item = Film(item_id, type='videogame', item_name, poster = item_poster, name_org = item_orgname, year = item_year)
 
          elif item_type == 'p':
             item = Person(item_id, item_orgname, poster = item_poster)
@@ -78,35 +79,35 @@ def get_popular_persons():
 
    return persons
 
-def get_top(item_type, genre, worldwide=True):
-   assert item_type in ['film', 'serial', 'videogame']
+def get_top(film_type, genre, worldwide=True):
+   assert film_type in common.film_types
    assert isinstance(genre, str)
    assert isinstance(worldwide, bool)
 
    # Game genre is sadly ignored
-   genre_id = common.get_genre_id(item_type, genre)
+   genre_id = common.get_genre_id(film_type, genre)
    if not genre_id:
       return False
 
    # Same as country option
-   if item_type == 'videogame' and not worldwide:
+   if film_type == 'videogame' and not worldwide:
       return False
 
-   req = 'top_100_{}s_{}'.format('game' if item_type == 'videogame' else item_type, 'world' if worldwide else 'poland')
+   req = 'top_100_{}s_{}'.format('game' if film_type == 'videogame' else film_type, 'world' if worldwide else 'poland')
    status, data = Filmweb._request('getRankingFilms', [req, str(genre_id)])
 
    results = []
    for v in data:
-      item = None
-      if item_type == 'film':
-         item = Film(v[0], rate=v[1], votes=v[4])
-      elif item_type == 'serial':
-         item = Serial(v[0], rate=v[1], votes=v[4])
-      elif item_type == 'videogame':
-         item = Videogame(v[0], rate=v[1], votes=v[4])
+      film = None
+      if film_type == 'film':
+         film = Film(v[0], type=film_type, rate=v[1], votes=v[4])
+      elif film_type == 'serial':
+         film = Film(v[0], type=film_type, rate=v[1], votes=v[4])
+      elif film_type == 'videogame':
+         film = Film(v[0], type=film_type, rate=v[1], votes=v[4])
 
       results.append({
-         'item': item,
+         'film': film,
          'position': v[2],
          'position_prev': v[3]
       })

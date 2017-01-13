@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from Filmweb import Filmweb, common
 
-class Item:
-   def __init__(self, uid, name=None, poster=None, name_org=None, year=None, rate=None, votes=None, duration=None):
+class Film:
+   def __init__(self, uid, type = 'unknown', name=None, poster=None, name_org=None, year=None, rate=None, votes=None, duration=None):
       self.uid = uid
+      self.type = ftype
       self.name = name
       self.poster = poster if poster != '' else None
       self.name_org = name_org
@@ -13,7 +14,7 @@ class Item:
       self.duration = duration
 
    def __repr__(self):
-      return '<Item id: {} name: {} poster: {}>'.format(self.uid, self.name, self.poster)
+      return '<Film id: {} name: {} poster: {}>'.format(self.uid, self.name, self.poster)
 
    @property
    def url(self):
@@ -33,12 +34,6 @@ class Item:
    def get_info(self):
       status, data = Filmweb._request('getFilmInfoFull', [self.uid])
 
-      item_type = 'film'
-      if data[15] == 1:
-         item_type = 'serial'
-      elif data[15] == 2:
-         item_type = 'videogame'
-
       result = {
          'name':              data[0],
          'name_org':          data[1],
@@ -55,7 +50,7 @@ class Item:
          'trailers':          data[12],
          'premiere':          data[13], # YYYY-MM-DD
          'premiere_local':    data[14], # YYYY-MM-DD
-         'type':              item_type,
+         'type':              common.get_film_type_name(data[15]),
          'season_count':      data[16],
          'episode_count':     data[17],
          'countries':         data[18].split(','),
@@ -63,6 +58,7 @@ class Item:
       }
 
       # Update object
+      self.type = result['type']
       self.name = result['name']
       self.year = result['year']
       self.rate = result['rate']
@@ -99,35 +95,14 @@ class Item:
             for pdata in v[1]:
                persons.append(Person(uid=pdata[0], name=pdata[1], poster=pdata[2][:-6] if pdata[2] else None))
 
-         results.append(Image(path=v[0][:-6], sources=v[2], associated_item=self, persons=persons))
+         results.append(Image(path=v[0][:-6], sources=v[2], associated_film=self, persons=persons))
 
       return results
 
-class Film(Item):
-   def __init__(self, uid, name=None, poster=None, name_org=None, year=None, rate=None, votes=None):
-      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year, rate=rate, votes=votes)
-
-   @property
-   def type(self):
-      return 'film'
-
-class Serial(Item):
-   def __init__(self, uid, name=None, poster=None, name_org=None, year=None, rate=None, votes=None):
-      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year, rate=rate, votes=votes)
-
-   @property
-   def type(self):
-      return 'serial'
-
-class Videogame(Item):
-   def __init__(self, uid, name=None, poster=None, name_org=None, year=None, rate=None, votes=None):
-      Item.__init__(self, uid, name, poster=poster, name_org=name_org, year=year, rate=rate, votes=votes)
-
-   @property
-   def type(self):
-      return 'videogame'
-
    def get_platforms(self):
+      if self.type != 'videogame':
+         return False
+
       status, data = Filmweb._request('getGameInfo', [self.uid])
       if data:
          return data[0].split(', ')

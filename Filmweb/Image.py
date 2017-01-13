@@ -3,9 +3,9 @@
 from Filmweb import common
 
 class Image:
-   def __init__(self, path, associated_item=None, persons=[], sources=[]):
+   def __init__(self, path, associated_film=None, persons=[], sources=[]):
       self.path = path
-      self.associated_item = associated_item
+      self.associated_film = associated_film
       self.persons = persons
       self.sources = sources
 

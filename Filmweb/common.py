@@ -134,26 +134,26 @@ game_genres = {
    'Taneczna': 38
 }
 
-def get_genre_id(item_type, genre_name):
-   if item_type == 'film' or item_type == 'serial':
+def get_genre_id(film_type, genre_name):
+   if film_type == 'film' or film_type == 'serial':
       container = film_genres
-   elif item_type == 'videogame':
+   elif film_type == 'videogame':
       container = game_genres
 
    if genre_name in container:
       return container[genre_name]
 
 person_role_types = {
-   'Reżyseria': 1,
-   'Scenariusz': 2,
-   'Muzyka': 3,
-   'Zdjęcia': 4,
+   'Reżyser': 1,
+   'Scenarzysta': 2,
+   'Autor muzyki': 3,
+   'Operator zdjęć': 4,
    'Na podstawie': 5,
-   'Aktorzy': 6,
+   'Aktor': 6,
   #'Aktorzy': 7, # same as 6? 
   #'Aktorzy': 8, # same as 6?
-   'Produkcja': 9,
-   'Montaż': 10
+   'Producent': 9,
+   'Montażysta': 10
 }
 
 def get_role_type_id(role_name):
@@ -166,3 +166,16 @@ image_sizes = {
    'square': 2,
    'medium': 3
 }
+
+film_types = ['film', 'serial', 'videogame']
+film_type_ids = {
+   'film': 0,
+   'serial': 1,
+   'videogame': 2
+}
+
+def get_film_type_id(film_name):
+   return film_type_ids[film_name]
+
+def get_film_type_name(film_id):
+   return film_types[film_id]
