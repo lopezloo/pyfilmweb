@@ -4,7 +4,7 @@ import json
 import requests
 
 from Filmweb.Items import *
-from Filmweb import common
+from Filmweb import common, exceptions
 
 def _request(method, params=[]):
    params = [v if v is not None else 'null' for v in params]
@@ -18,12 +18,16 @@ def _request(method, params=[]):
       'methods': data_str
    }
    r = requests.get(common.URL_API, params=rparams)
+   print(r.text.encode('utf-8'))
 
    data = r.text.split('\n')
-   status = data[0]
-   if status == 'ok':
-      return status, json.loads(data[1][:-7])
-   return status
+   status = data[0].split(',')
+
+   if status[0] != 'ok':
+      d = data[1].split(', ')
+      error_code, error_msg = int(d[0]), d[1]
+      raise exceptions.RequestFailed(error_code, error_msg)
+   return json.loads(data[1][:-7])
 
 def search(text):
    r = requests.get('{}/search/live'.format(common.URL), params={'q': text})
@@ -59,7 +63,7 @@ def search(text):
    return items
 
 def get_popular_films():
-   status, data = Filmweb._request('getPopularFilms')
+   data = Filmweb._request('getPopularFilms')
 
    films = []
    for v in data:
@@ -68,7 +72,7 @@ def get_popular_films():
    return films
 
 def get_popular_persons():
-   status, data = Filmweb._request('getPopularPersons')
+   data = Filmweb._request('getPopularPersons')
 
    persons = []
    for v in data:
@@ -89,7 +93,7 @@ def get_top(film_type, genre=None, worldwide=True):
       return False
 
    req = 'top_100_{}s_{}'.format('game' if film_type == 'videogame' else film_type, 'world' if worldwide else 'poland')
-   status, data = Filmweb._request('getRankingFilms', [req, genre_id])
+   data = Filmweb._request('getRankingFilms', [req, genre_id])
 
    results = []
    for v in data:
@@ -103,7 +107,7 @@ def get_top(film_type, genre=None, worldwide=True):
 
 def get_upcoming_films(above_date=None):
    # Nice typo, Filmweb!
-   status, data = Filmweb._request('getUpcommingFilms', [above_date])
+   data = Filmweb._request('getUpcommingFilms', [above_date])
 
    results = []
    for day in data:
@@ -123,7 +127,7 @@ def get_upcoming_films(above_date=None):
    return results
 
 def get_born_today_persons():
-   status, data = Filmweb._request('getBornTodayPersons')
+   data = Filmweb._request('getBornTodayPersons')
    results = []
    for v in data:
       results.append(Person(uid=v[0], name=v[1], poster=v[2][:-6] if v[2] else None, date_birth=common.str_to_date(v[3]), date_death=common.str_to_date(v[4])))

@@ -30,11 +30,11 @@ class Film:
          return '{}/po{}.{}.jpg'.format(common.URL_CDN, self.poster, poster_sizes[size])
 
    def get_description(self):
-      status, data = Filmweb._request('getFilmDescription', [self.uid])
+      data = Filmweb._request('getFilmDescription', [self.uid])
       return data[0]
 
    def get_info(self):
-      status, data = Filmweb._request('getFilmInfoFull', [self.uid])
+      data = Filmweb._request('getFilmInfoFull', [self.uid])
 
       result = {
          'name':              data[0],
@@ -75,7 +75,7 @@ class Film:
       assert role_type in common.person_role_types
       assert isinstance(offset, int)
       limit = 50 # Sadly ignored
-      status, data = Filmweb._request('getFilmPersons', [self.uid, common.get_role_type_id(role_type), offset, limit])
+      data = Filmweb._request('getFilmPersons', [self.uid, common.get_role_type_id(role_type), offset, limit])
 
       results = []
       for v in data:
@@ -88,7 +88,7 @@ class Film:
 
    def get_images(self, offset=0):
       limit = 100 # ignored
-      status, data = Filmweb._request('getFilmImages', [[self.uid, offset, limit]])
+      data = Filmweb._request('getFilmImages', [[self.uid, offset, limit]])
       results = []
       for v in data:
          persons = []
@@ -105,7 +105,7 @@ class Film:
       if self.type != 'videogame':
          return False
 
-      status, data = Filmweb._request('getGameInfo', [self.uid])
+      data = Filmweb._request('getGameInfo', [self.uid])
       if data:
          return data[0].split(', ')
 
@@ -114,7 +114,7 @@ class Film:
       offset = 0
       limit = 100
 
-      status, data = Filmweb._request('getFilmsNearestBroadcasts', [[self.uid, offset, limit]])
+      data = Filmweb._request('getFilmsNearestBroadcasts', [[self.uid, offset, limit]])
 
       results = []
       for v in data:
@@ -152,12 +152,12 @@ class Person:
          return '{}/p{}.{}.jpg'.format(common.URL_CDN, self.poster, 0 if size == 'tiny' else 1)
 
    def get_biography(self):
-      status, data = Filmweb._request('getPersonBiography', [self.uid])
+      data = Filmweb._request('getPersonBiography', [self.uid])
       if data:
          return data[0]
 
    def get_info(self):
-      status, data = Filmweb._request('getPersonInfoFull', [self.uid])
+      data = Filmweb._request('getPersonInfoFull', [self.uid])
 
       result = {
          'name': data[0],
@@ -186,7 +186,7 @@ class Person:
 
    def get_images(self, offset=0):
       limit = 100 # ignored
-      status, data = Filmweb._request('getPersonImages', [self.uid, offset, limit])
+      data = Filmweb._request('getPersonImages', [self.uid, offset, limit])
 
       results = []
       for v in data:
@@ -202,7 +202,7 @@ class Person:
 
    # Ordered by popularity
    def get_roles(self, limit=50):
-      status, data = Filmweb._request('getPersonFilmsLead', [self.uid, limit])
+      data = Filmweb._request('getPersonFilmsLead', [self.uid, limit])
 
       results = []
       for v in data:
@@ -217,7 +217,7 @@ class Person:
 
    # Ordered from newest
    def get_films(self, film_type, role_type, offset=0, limit=50):
-      status, data = Filmweb._request('getPersonFilms', [self.uid, common.get_film_type_id(film_type), common.get_role_type_id(role_type), offset, limit])
+      data = Filmweb._request('getPersonFilms', [self.uid, common.get_film_type_id(film_type), common.get_role_type_id(role_type), offset, limit])
 
       results = []
       for v in data:
@@ -263,7 +263,7 @@ class Channel:
 
    # date: max +13, min -1 days
    def get_schedule(self, date):
-      status, data = Filmweb._request('getTvSchedule', [self.uid, str(date)])
+      data = Filmweb._request('getTvSchedule', [self.uid, str(date)])
 
       results = []
       for v in data:
