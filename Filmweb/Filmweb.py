@@ -10,15 +10,14 @@ def _request(method, params=[]):
    params = [v if v is not None else 'null' for v in params]
    data_str = '{} {}\n'.format(method, str(params))
 
-   sig = '1.0,'+md5((data_str + 'android' + common.API_KEY).encode()).hexdigest()
+   sig = '{},{}'.format(common.API_VER, md5((data_str + 'android' + common.API_KEY).encode()).hexdigest())
    rparams = {
-      'version': 1.0,
+      'version': common.API_VER,
       'appId': 'android',
       'signature': sig,
       'methods': data_str
    }
    r = requests.get(common.URL_API, params=rparams)
-   print(r.text.encode('utf-8'))
 
    data = r.text.split('\n')
    status = data[0].split(',')
@@ -131,4 +130,26 @@ def get_born_today_persons():
    results = []
    for v in data:
       results.append(Person(uid=v[0], name=v[1], poster=v[2][:-6] if v[2] else None, date_birth=common.str_to_date(v[3]), date_death=common.str_to_date(v[4])))
+   return results
+
+def get_trailers(offset=0, limit=10):
+   data = Filmweb._request('getTrailers', [offset, limit])
+   results = []
+   for v in data:
+      vid_uid = common.trailer_url_to_uid(v[4] or v[7] or v[8])
+      film = Film(uid=v[2], name=v[0], poster=v[5][:-6] if v[5] else None)
+      results.append(
+         Trailer(film=film, date=common.str_to_date(v[1]), img=v[3], name=v[6], age_restriction=v[9], vid_uid=vid_uid)
+      )
+   return results
+
+def get_popular_trailers(offset=0, limit=10):
+   data = Filmweb._request('getPopularTrailers', [offset, limit])
+   results = []
+   for v in data:
+      vid_uid = common.trailer_url_to_uid(v[4] or v[7] or v[8])
+      film = Film(uid=v[2], name=v[0], poster=v[5][:-6] if v[5] else None)
+      results.append(
+         Trailer(film=film, date=common.str_to_date(v[1]), img=v[3], name=v[6], age_restriction=v[9], vid_uid=vid_uid)
+      )
    return results

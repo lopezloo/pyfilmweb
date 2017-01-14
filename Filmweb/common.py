@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
+import re
 
 API_KEY = 'qjcGhW2JnvGT9dfCt3uT_jozR3s'
+API_VER = 2.7
 URL     = 'http://www.filmweb.pl'
 URL_CDN = 'http://1.fwcdn.pl'
 URL_API = 'https://ssl.filmweb.pl/api'
@@ -185,3 +187,7 @@ def get_film_type_name(film_id):
 def str_to_date(s):
    if s:
       return datetime.strptime(s, '%Y-%m-%d').date()
+
+def trailer_url_to_uid(url):
+   if url:
+      return re.match('http:\/\/mm.filmweb.pl\/(.*)\..*\.mp4', url).group(1)

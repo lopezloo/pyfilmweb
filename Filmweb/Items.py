@@ -36,6 +36,12 @@ class Film:
    def get_info(self):
       data = Filmweb._request('getFilmInfoFull', [self.uid])
 
+      trailer = None
+      if data[12]:
+         trailer = Trailer(
+            film=self, img=data[12][0], age_restriction=data[12][4], vid_uid=common.trailer_url_to_uid(data[12][1] or data[12][2] or data[12][3])
+         )
+
       result = {
          'name':              data[0],
          'name_org':          data[1],
@@ -49,7 +55,7 @@ class Film:
          'has_review':        data[9],
          'has_description':   data[10],
          'poster_small':      data[11],
-         'trailers':          data[12],
+         'trailer':           trailer,
          'premiere':          data[13], # YYYY-MM-DD
          'premiere_local':    data[14], # YYYY-MM-DD
          'type':              common.get_film_type_name(data[15]),
@@ -237,7 +243,7 @@ class Image:
       self.sources = sources
 
    def get_url(self, size='medium'):
-      return '{}/ph{}.{}.jpg'.format(common.URL_CDN, self.path, image_sizes[size])
+      return '{}/ph{}.{}.jpg'.format(common.URL_CDN, self.path, common.image_sizes[size])
 
 class Channel:
    def __init__(self, uid, name=None):
@@ -276,3 +282,29 @@ class Channel:
             'film': Film(uid=v[5], name=v[1], year=v[6], duration=v[7], poster=v[8][:-6] if v[8] else None) if v[5] else None
          })
       return results
+
+class Trailer:
+   def __init__(self, film, date=None, img=None, name=None, vid_uid=None, age_restriction=None):
+      self.film = film
+      self.date = date
+      self.img = img
+      self.name = name
+      self.vid_uid = vid_uid
+      self.age_restriction = age_restriction
+
+   def __repr__(self):
+      return '<Trailer film.uid {} film.name {} name: {} >'.format(self.film.uid if self.film else None, self.film.name if self.film else None, self.name)
+
+   @property
+   def type(self):
+      return 'trailer'
+
+   @property
+   def url(self):
+      if self.name and self.film and self.film.uid:
+         return '{}/video/zwiastun/{}-{}'.format(common.URL, self.name.replace(' ', '+'), self.film.uid)
+
+   def get_video(self, size='iphone'):
+      assert size in ['iphone', '480p', '720p']
+      if self.vid_uid:
+         return 'http://mm.filmweb.pl/{}.{}.mp4'.format(self.vid_uid, size)
