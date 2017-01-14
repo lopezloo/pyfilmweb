@@ -52,17 +52,25 @@ class Film:
          'duration':          data[6],
         #'comments_count':    data[7], # leftover, always 0
          'discussion_url':    data[8],
-         'has_review':        data[9],
-         'has_description':   data[10],
+         'has_review':        bool(data[9]),
+         'has_description':   bool(data[10]),
          'poster_small':      data[11],
          'trailer':           trailer,
-         'premiere':          data[13], # YYYY-MM-DD
-         'premiere_local':    data[14], # YYYY-MM-DD
+         'premiere':          common.str_to_date(data[13]),
+         'premiere_local':    common.str_to_date(data[14]),
          'type':              common.get_film_type_name(data[15]),
          'season_count':      data[16],
          'episode_count':     data[17],
          'countries':         data[18].split(','),
-         'description_short': data[19]
+         'description_short': data[19],
+         'top_pos':           data[20],
+         'wanna_see_count':   data[21],
+         'not_interested_count': data[22], # not 100% sure
+         'recommended':       bool(data[23]),
+         'curiosities_count': data[24],
+         'boxoffice':         data[25],
+         'boxoffice_top_pos': data[26],
+         'budget':            data[27]
       }
 
       # Update object
