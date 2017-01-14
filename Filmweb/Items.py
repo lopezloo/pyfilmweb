@@ -37,9 +37,19 @@ class Film:
       data = Filmweb._request('getFilmInfoFull', [self.uid])
 
       trailer = None
+      print(str(data[12]))
       if data[12]:
-         trailer = Trailer(
-            film=self, img=data[12][0], age_restriction=data[12][4], vid_uid=common.trailer_url_to_uid(data[12][1] or data[12][2] or data[12][3])
+         img = data[12][0]
+         uid = common.video_img_url_to_uid(img)
+
+         vid_urls = {
+            'main': data[12][1],
+            '480p': data[12][3],
+            '720p': data[12][2]
+         }
+
+         trailer = Video(
+             uid=uid, film=self, img=data[12][0], age_restriction=data[12][4], vid_urls=vid_urls
          )
 
       result = {
@@ -137,6 +147,20 @@ class Film:
             'datetime': datetime.strptime(v[3]+v[2], '%Y-%m-%d%H:%M'),
             'uid': v[4]
          })
+
+      return results
+
+   def get_videos(self, offset=0, limit=100):
+      data = Filmweb._request('getFilmVideos', [self.uid, offset, limit])
+
+      results = []
+      for v in data:
+         #img_low = v[0]
+         img = v[1]
+         uid = common.video_img_url_to_uid(img)
+         results.append(
+            Video(uid=uid, film=self, img=img, vid_urls={'main': v[2]}, age_restriction=v[3])
+         )
 
       return results
 
@@ -291,17 +315,20 @@ class Channel:
          })
       return results
 
-class Trailer:
-   def __init__(self, film, date=None, img=None, name=None, vid_uid=None, age_restriction=None):
+class Video:
+   def __init__(self, uid, film, date=None, img=None, name=None, age_restriction=None, vid_urls=[]):
+      self.uid = uid
       self.film = film
       self.date = date
       self.img = img
       self.name = name
-      self.vid_uid = vid_uid
       self.age_restriction = age_restriction
+      self.vid_urls = vid_urls
+
+      self.program_name = 'zwiastun'
 
    def __repr__(self):
-      return '<Trailer film.uid {} film.name {} name: {} >'.format(self.film.uid if self.film else None, self.film.name if self.film else None, self.name)
+      return '<Video film.uid {} film.name {} name: {}>'.format(self.film.uid if self.film else None, self.film.name if self.film else None, self.name)
 
    @property
    def type(self):
@@ -309,10 +336,10 @@ class Trailer:
 
    @property
    def url(self):
-      if self.name and self.film and self.film.uid:
-         return '{}/video/zwiastun/{}-{}'.format(common.URL, self.name.replace(' ', '+'), self.film.uid)
+      if self.uid:
+         return '{}/video/{}/{}-{}'.format(common.URL, self.program_name, self.name.replace(' ', '+') or 'A', self.uid)
 
-   def get_video(self, size='iphone'):
-      assert size in ['iphone', '480p', '720p']
-      if self.vid_uid:
-         return 'http://mm.filmweb.pl/{}.{}.mp4'.format(self.vid_uid, size)
+   def get_video(self, size='main'):
+      assert size in ['main', '480p', '720p']
+      if size in self.vid_urls:
+         return self.vid_urls[size]

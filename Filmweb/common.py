@@ -190,4 +190,16 @@ def str_to_date(s):
 
 def trailer_url_to_uid(url):
    if url:
-      return re.match('http:\/\/mm.filmweb.pl\/(.*)\..*\.mp4', url).group(1)
+      r = re.match('http:\/\/mm.filmweb.pl\/(.*)\..*\.mp4', url)
+      if r:
+         return int(r.group(1))
+      else:
+         print('Unknown trailer url: {}'.format(url))
+
+def video_img_url_to_uid(url):
+   if url:
+      r = re.search('\.(\d+)\.\d\.', url)
+      if r:
+         return int(r.group(1))
+      else:
+         print('Unknown img url: {}'.format(url))

@@ -8,7 +8,8 @@ from Filmweb import common, exceptions
 
 def _request(method, params=[]):
    params = [v if v is not None else 'null' for v in params]
-   data_str = '{} {}\n'.format(method, str(params))
+   data_str = '{} {}\n'.format(method, str(params)).replace("'", '"')
+   print(data_str)
 
    sig = '{},{}'.format(common.API_VER, md5((data_str + 'android' + common.API_KEY).encode()).hexdigest())
    rparams = {
@@ -136,10 +137,18 @@ def get_trailers(offset=0, limit=10):
    data = Filmweb._request('getTrailers', [offset, limit])
    results = []
    for v in data:
-      vid_uid = common.trailer_url_to_uid(v[4] or v[7] or v[8])
+      img = v[3]
+      uid = common.video_img_url_to_uid(img)
+
+      vid_urls = {
+         'main': v[4],
+         '480p': v[7],
+         '720p': v[8]
+      }
+
       film = Film(uid=v[2], name=v[0], poster=v[5][:-6] if v[5] else None)
       results.append(
-         Trailer(film=film, date=common.str_to_date(v[1]), img=v[3], name=v[6], age_restriction=v[9], vid_uid=vid_uid)
+         Video(film=film, date=common.str_to_date(v[1]), img=img, name=v[6], age_restriction=v[9], vid_uid=vid_uid, vid_urls=vid_urls)
       )
    return results
 
@@ -147,9 +156,17 @@ def get_popular_trailers(offset=0, limit=10):
    data = Filmweb._request('getPopularTrailers', [offset, limit])
    results = []
    for v in data:
-      vid_uid = common.trailer_url_to_uid(v[4] or v[7] or v[8])
+      img = v[3]
+      uid = common.video_img_url_to_uid(img)
+
+      vid_urls = {
+         'main': v[4],
+         '480p': v[8],
+         '720p': v[7]
+      }
+
       film = Film(uid=v[2], name=v[0], poster=v[5][:-6] if v[5] else None)
       results.append(
-         Trailer(film=film, date=common.str_to_date(v[1]), img=v[3], name=v[6], age_restriction=v[9], vid_uid=vid_uid)
+         Video(uid=uid, name=v[6], film=film, date=common.str_to_date(v[1]), img=img, age_restriction=v[9], vid_urls=vid_urls)
       )
    return results
