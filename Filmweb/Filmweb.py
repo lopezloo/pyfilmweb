@@ -90,7 +90,7 @@ def get_top(film_type, genre=None, worldwide=True):
 
    # Same as country option
    if film_type == 'videogame' and not worldwide:
-      return False
+      raise ValueError('videogame type doesn\'t support worldwide=False')
 
    req = 'top_100_{}s_{}'.format('game' if film_type == 'videogame' else film_type, 'world' if worldwide else 'poland')
    data = Filmweb._request('getRankingFilms', [req, genre_id])

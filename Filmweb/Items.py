@@ -103,7 +103,7 @@ class Film:
 
    def get_platforms(self):
       if self.type != 'videogame':
-         return False
+         raise ValueError('unsupported object type (expected videogame)')
 
       data = Filmweb._request('getGameInfo', [self.uid])
       if data:
