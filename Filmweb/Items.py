@@ -49,7 +49,7 @@ class Film:
          }
 
          trailer = Video(
-             uid=uid, film=self, img=data[12][0], age_restriction=data[12][4], vid_urls=vid_urls
+             uid=uid, category='zwiastun', film=self, img=data[12][0], min_age=data[12][4], vid_urls=vid_urls
          )
 
       result = {
@@ -159,7 +159,7 @@ class Film:
          img = v[1]
          uid = common.video_img_url_to_uid(img)
          results.append(
-            Video(uid=uid, film=self, img=img, vid_urls={'main': v[2]}, age_restriction=v[3])
+            Video(uid=uid, category='zwiastun', film=self, img=img, vid_urls={'main': v[2]}, min_age=v[3])
          )
 
       return results
@@ -316,28 +316,23 @@ class Channel:
       return results
 
 class Video:
-   def __init__(self, uid, film, date=None, img=None, name=None, age_restriction=None, vid_urls=[]):
+   def __init__(self, uid, category=None, film=None, date=None, img=None, name=None, min_age=None, vid_urls=[]):
       self.uid = uid
+      self.category = category
       self.film = film
       self.date = date
       self.img = img
       self.name = name
-      self.age_restriction = age_restriction
+      self.min_age = min_age
       self.vid_urls = vid_urls
 
-      self.program_name = 'zwiastun'
-
    def __repr__(self):
-      return '<Video film.uid {} film.name {} name: {}>'.format(self.film.uid if self.film else None, self.film.name if self.film else None, self.name)
-
-   @property
-   def type(self):
-      return 'trailer'
+      return '<Video uid: {} category: {} name: {}>'.format(self.uid, self.category, self.name)
 
    @property
    def url(self):
       if self.uid:
-         return '{}/video/{}/{}-{}'.format(common.URL, self.program_name, self.name.replace(' ', '+') or 'A', self.uid)
+         return '{}/video/{}/{}-{}'.format(common.URL, self.category or 'zwiastun', self.name.replace(' ', '+') or 'A', self.uid)
 
    def get_video(self, size='main'):
       assert size in ['main', '480p', '720p']

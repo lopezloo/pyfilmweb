@@ -8,8 +8,7 @@ from Filmweb import common, exceptions
 
 def _request(method, params=[]):
    params = [v if v is not None else 'null' for v in params]
-   data_str = '{} {}\n'.format(method, str(params)).replace("'", '"')
-   print(data_str)
+   data_str = '{} {}\n'.format(method, str(params))
 
    sig = '{},{}'.format(common.API_VER, md5((data_str + 'android' + common.API_KEY).encode()).hexdigest())
    rparams = {
@@ -27,6 +26,10 @@ def _request(method, params=[]):
       d = data[1].split(', ')
       error_code, error_msg = int(d[0]), d[1]
       raise exceptions.RequestFailed(error_code, error_msg)
+
+   if data[1][:3] == 'exc':
+      raise exceptions.RequestFailed('exc', data[1][4:])
+
    return json.loads(data[1][:-7])
 
 def search(text):
@@ -148,7 +151,7 @@ def get_trailers(offset=0, limit=10):
 
       film = Film(uid=v[2], name=v[0], poster=v[5][:-6] if v[5] else None)
       results.append(
-         Video(film=film, date=common.str_to_date(v[1]), img=img, name=v[6], age_restriction=v[9], vid_uid=vid_uid, vid_urls=vid_urls)
+         Video(film=film, date=common.str_to_date(v[1]), img=img, name=v[6], min_age=v[9], vid_uid=vid_uid, vid_urls=vid_urls)
       )
    return results
 
@@ -167,6 +170,35 @@ def get_popular_trailers(offset=0, limit=10):
 
       film = Film(uid=v[2], name=v[0], poster=v[5][:-6] if v[5] else None)
       results.append(
-         Video(uid=uid, name=v[6], film=film, date=common.str_to_date(v[1]), img=img, age_restriction=v[9], vid_urls=vid_urls)
+         Video(uid=uid, name=v[6], film=film, date=common.str_to_date(v[1]), img=img, min_age=v[9], vid_urls=vid_urls)
       )
    return results
+
+# this gonna throw RequestFailed(20, 'IllegalArgumentException') if category is unknown
+# and doesn't accept trailers category
+def get_filmweb_productions(category, offset=0, limit=100):
+   unk = -1
+   category = category.lower().replace(' ', '_')
+   data = Filmweb._request('getFilmwebProductions', [unk, category, offset, limit])
+
+   result = {
+     #'unk': data[0],
+      'category_description': data[1],
+      'videos': []
+   }
+   for v in data[2:]:
+      img = v[2]
+      uid = common.video_img_url_to_uid(img)
+
+      vid_urls = {
+         'main': v[3],
+         '480p': v[5],
+         '720p': v[4]
+      }
+
+     #unk=data[6] # int
+      result['videos'].append({
+         Video(uid=uid, category=category, name=v[0], date=common.str_to_date(v[1]), img=img, min_age=v[7], vid_urls=vid_urls)
+      })
+
+   return result
