@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from Filmweb import Filmweb, common
+import Filmweb
+from . import common
 from datetime import datetime
 
 class Film:
@@ -30,11 +31,11 @@ class Film:
          return '{}/po{}.{}.jpg'.format(common.URL_CDN, self.poster, poster_sizes[size])
 
    def get_description(self):
-      data = Filmweb._request('getFilmDescription', [self.uid])
+      data = Filmweb.Filmweb._request('getFilmDescription', [self.uid])
       return data[0]
 
    def get_info(self):
-      data = Filmweb._request('getFilmInfoFull', [self.uid])
+      data = Filmweb.Filmweb._request('getFilmInfoFull', [self.uid])
 
       trailer = None
       print(str(data[12]))
@@ -99,7 +100,7 @@ class Film:
       assert role_type in common.person_role_types
       assert isinstance(offset, int)
       limit = 50 # Sadly ignored
-      data = Filmweb._request('getFilmPersons', [self.uid, common.get_role_type_id(role_type), offset, limit])
+      data = Filmweb.Filmweb._request('getFilmPersons', [self.uid, common.get_role_type_id(role_type), offset, limit])
 
       results = []
       for v in data:
@@ -112,7 +113,7 @@ class Film:
 
    def get_images(self, offset=0):
       limit = 100 # ignored
-      data = Filmweb._request('getFilmImages', [[self.uid, offset, limit]])
+      data = Filmweb.Filmweb._request('getFilmImages', [[self.uid, offset, limit]])
       results = []
       for v in data:
          persons = []
@@ -129,7 +130,7 @@ class Film:
       if self.type != 'videogame':
          raise ValueError('unsupported object type (expected videogame)')
 
-      data = Filmweb._request('getGameInfo', [self.uid])
+      data = Filmweb.Filmweb._request('getGameInfo', [self.uid])
       if data:
          return data[0].split(', ')
 
@@ -138,7 +139,7 @@ class Film:
       offset = 0
       limit = 100
 
-      data = Filmweb._request('getFilmsNearestBroadcasts', [[self.uid, offset, limit]])
+      data = Filmweb.Filmweb._request('getFilmsNearestBroadcasts', [[self.uid, offset, limit]])
 
       results = []
       for v in data:
@@ -151,7 +152,7 @@ class Film:
       return results
 
    def get_videos(self, offset=0, limit=100):
-      data = Filmweb._request('getFilmVideos', [self.uid, offset, limit])
+      data = Filmweb.Filmweb._request('getFilmVideos', [self.uid, offset, limit])
 
       results = []
       for v in data:
@@ -190,12 +191,12 @@ class Person:
          return '{}/p{}.{}.jpg'.format(common.URL_CDN, self.poster, 0 if size == 'tiny' else 1)
 
    def get_biography(self):
-      data = Filmweb._request('getPersonBiography', [self.uid])
+      data = Filmweb.Filmweb._request('getPersonBiography', [self.uid])
       if data:
          return data[0]
 
    def get_info(self):
-      data = Filmweb._request('getPersonInfoFull', [self.uid])
+      data = Filmweb.Filmweb._request('getPersonInfoFull', [self.uid])
 
       result = {
          'name': data[0],
@@ -224,7 +225,7 @@ class Person:
 
    def get_images(self, offset=0):
       limit = 100 # ignored
-      data = Filmweb._request('getPersonImages', [self.uid, offset, limit])
+      data = Filmweb.Filmweb._request('getPersonImages', [self.uid, offset, limit])
 
       results = []
       for v in data:
@@ -240,7 +241,7 @@ class Person:
 
    # Ordered by popularity
    def get_roles(self, limit=50):
-      data = Filmweb._request('getPersonFilmsLead', [self.uid, limit])
+      data = Filmweb.Filmweb._request('getPersonFilmsLead', [self.uid, limit])
 
       results = []
       for v in data:
@@ -255,7 +256,7 @@ class Person:
 
    # Ordered from newest
    def get_films(self, film_type, role_type, offset=0, limit=50):
-      data = Filmweb._request('getPersonFilms', [self.uid, common.get_film_type_id(film_type), common.get_role_type_id(role_type), offset, limit])
+      data = Filmweb.Filmweb._request('getPersonFilms', [self.uid, common.get_film_type_id(film_type), common.get_role_type_id(role_type), offset, limit])
 
       results = []
       for v in data:
@@ -301,7 +302,7 @@ class Channel:
 
    # date: max +13, min -1 days
    def get_schedule(self, date):
-      data = Filmweb._request('getTvSchedule', [self.uid, str(date)])
+      data = Filmweb.Filmweb._request('getTvSchedule', [self.uid, str(date)])
 
       results = []
       for v in data:
@@ -352,7 +353,7 @@ class Cinema:
 
    # (keep in mind this result is unsorted)
    def get_repertoire(self, date):
-      data = Filmweb._request('getRepertoireByCinema', [self.uid, str(date)])
+      data = Filmweb.Filmweb._request('getRepertoireByCinema', [self.uid, str(date)])
 
       if len(data) == 0:
          return []

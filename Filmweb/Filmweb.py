@@ -3,13 +3,12 @@ from hashlib import md5
 import json
 import requests
 
-from Filmweb.Items import *
-from Filmweb import common, exceptions
+from . import common, exceptions
+from .Items import *
 
 def _request(method, params=[]):
    params = [v if v is not None else 'null' for v in params]
    data_str = '{} {}\n'.format(method, str(params))
-   print(str(data_str))
 
    sig = '{},{}'.format(common.API_VER, md5((data_str + 'android' + common.API_KEY).encode()).hexdigest())
    rparams = {
