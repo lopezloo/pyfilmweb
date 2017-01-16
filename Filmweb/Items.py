@@ -338,3 +338,43 @@ class Video:
       assert size in ['main', '480p', '720p']
       if size in self.vid_urls:
          return self.vid_urls[size]
+
+class Cinema:
+   def __init__(self, uid, name=None, city_name=None, address=None, coords=None):
+      self.uid = uid
+      self.name = name
+      self.city_name = city_name
+      self.address = address
+      self.coords = coords
+
+   def __repr__(self):
+      return '<Cinema uid: {} name: {}>'.format(self.uid, self.name)
+
+   # (keep in mind this result is unsorted)
+   def get_repertoire(self, date):
+      data = Filmweb._request('getRepertoireByCinema', [self.uid, str(date)])
+
+      if len(data) == 0:
+         return []
+
+      # Last element is list which contains films data
+      films_data = data[len(data)-1]
+      films = {}
+      for v in films_data:
+         uid = v[6]
+         films[uid] = Film(name=v[0], year=v[1], rate=v[2], votes=v[3], duration=v[4], poster=v[5][:6] if v[5] else None, uid=uid)
+
+      results = []
+      # For all seances
+      for v in data[:-1]:
+         film_uid = v[0]
+         results.append({
+            'film': films[film_uid],
+            'hours': v[1].split(' '), # ex: '13:05 17:05' => ['13:05', '17:05']
+            'attributes': v[2], # some flag?
+            'notes': v[3],
+            'dubbing_langs': v[4].split('+') if v[4] else None,
+            'subtitles_langs': v[5].split('+') if v[5] else None,
+         })
+
+      return results

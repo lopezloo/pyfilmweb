@@ -37,29 +37,26 @@ def search(text):
 
    items = []
    for item in r.text.split('\\a'):
-      data = item.split('\\c')
-      item_type = data[0]
-      item_id = data[1]
-      item_poster = data[2][:-6]
-      if item_type in ['f', 's', 'g', 'p']:
-         item_orgname = data[3]
-         item_name = data[4]
-         item_year = data[6]
+      v = item.split('\\c')
 
-         if item_type == 'f':
-            item = Film(item_id, 'film', item_name, poster=item_poster, name_org=item_orgname, year=item_year)
-
-         elif item_type == 's':
-            item = Film(item_id, 'serial', item_name, poster=item_poster, name_org=item_orgname, year=item_year)
-
+      item_type = v[0]
+      if item_type in ['f', 's', 'g']:
+         ftype = 'film'
+         if item_type == 's':
+            ftype = 'serial'
          elif item_type == 'g':
-            item = Film(item_id, 'videogame', item_name, poster=item_poster, name_org=item_orgname, year=item_year)
+            ftype = 'videogame'
 
-         elif item_type == 'p':
-            item = Person(item_id, item_orgname, poster=item_poster)
+         item = Film(uid=v[1], type=ftype, name=v[4], poster=v[2][:-6] if v[2] else None, name_org=v[3], year=v[6])
+
+      elif item_type == 'p':
+         item = Person(uid=v[1], name=v[3], poster=v[2][:-6] if v[2] else None)
 
       elif item_type == 't':
-         item = Channel(data[1], data[2])
+         item = Channel(uid=v[1], name=v[2])
+
+      elif item_type == 'c':
+         item = Cinema(uid=int(v[1]), name=v[2], city_name=v[3], address=v[4], coords=v[5])
 
       items.append(item)
 
