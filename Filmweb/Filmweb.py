@@ -9,6 +9,7 @@ from Filmweb import common, exceptions
 def _request(method, params=[]):
    params = [v if v is not None else 'null' for v in params]
    data_str = '{} {}\n'.format(method, str(params))
+   print(str(data_str))
 
    sig = '{},{}'.format(common.API_VER, md5((data_str + 'android' + common.API_KEY).encode()).hexdigest())
    rparams = {
@@ -32,8 +33,22 @@ def _request(method, params=[]):
 
    return json.loads(data[1][:-7])
 
-def search(text):
-   r = requests.get('{}/search/live'.format(common.URL), params={'q': text})
+def search(query):
+   """Searches in Filmweb database.
+
+   :param str query:  search query
+   :return: list containing result items (they can be: :class:`Film`, :class:`Person`, :class:`Channel`, :class:`Cinema`)
+   :rtype: list
+
+   :Example:
+
+   .. code:: python
+
+      items = Filmweb.search('Jak działa jamniczek')
+      if len(items) > 0 and isinstance(items[0], Film):
+         print(items[0].name, items[0].year)
+   """
+   r = requests.get('{}/search/live'.format(common.URL), params={'q': query})
 
    items = []
    for item in r.text.split('\\a'):
@@ -63,6 +78,10 @@ def search(text):
    return items
 
 def get_popular_films():
+   """Returns (how many?) popular films
+
+   :return: list of :class:`Films`'s
+   """
    data = Filmweb._request('getPopularFilms')
 
    films = []
@@ -72,6 +91,10 @@ def get_popular_films():
    return films
 
 def get_popular_persons():
+   """Returns (how many?) popular persons
+
+   :return: list of :class:`Person`'s
+   """
    data = Filmweb._request('getPopularPersons')
 
    persons = []
@@ -81,6 +104,25 @@ def get_popular_persons():
    return persons
 
 def get_top(film_type, genre=None, worldwide=True):
+   """Returns TOP N (how many?) popular :class:`Film`'s
+
+   :param str film_type: :class:`Film` object type (film, serial, videogame)
+   :param str genre: (optional) genre name (ignored if film_type==videogame)
+   :param bool worldwide: (optional) determines if returned top :class:`Film`'s should be from any country or only Poland (can't be False if film_type==videogame)
+
+   :return: list of results
+
+   .. code:: python
+
+      [
+         {
+            'film': Film(uid, type, rate, votes),
+            'position': 5,
+            'position_prev': 3
+         }
+      ]
+
+   """
    assert film_type in common.film_types
    assert isinstance(genre, str)
    assert isinstance(worldwide, bool)
@@ -106,6 +148,28 @@ def get_top(film_type, genre=None, worldwide=True):
    return results
 
 def get_upcoming_films(above_date=None):
+   """Returns upcoming :class:`Film`'s
+
+   :param date above_date: date which above results are returned
+
+   :return: list of results
+   
+   .. code:: python
+
+      [
+         {
+            'date': date(),
+            'films': [
+               {
+                  'film': Film(uid, name, year, poster),
+                  'person_names': [person1_name, person2_name]
+               }
+            ]
+         }
+      ]
+
+   """
+
    # Nice typo, Filmweb!
    data = Filmweb._request('getUpcommingFilms', [above_date])
 
@@ -127,6 +191,10 @@ def get_upcoming_films(above_date=None):
    return results
 
 def get_born_today_persons():
+   """Returns born today persons.
+
+   :return: list of :class:`Person`'s
+   """
    data = Filmweb._request('getBornTodayPersons')
    results = []
    for v in data:
@@ -134,6 +202,13 @@ def get_born_today_persons():
    return results
 
 def get_trailers(offset=0, limit=10):
+   """Returns trailer from newest.
+
+   :param int offset: (optional) start position
+   :param int limit: (optional) maximum of results
+
+   :return: list of :class:`Video`'s
+   """
    data = Filmweb._request('getTrailers', [offset, limit])
    results = []
    for v in data:
@@ -153,6 +228,13 @@ def get_trailers(offset=0, limit=10):
    return results
 
 def get_popular_trailers(offset=0, limit=10):
+   """Returns popular trailers.
+
+   :param int offset: (optional) start position
+   :param int limit: (optional) maximum of results
+
+   :return: list of :class:`Video`'s
+   """
    data = Filmweb._request('getPopularTrailers', [offset, limit])
    results = []
    for v in data:
@@ -171,9 +253,25 @@ def get_popular_trailers(offset=0, limit=10):
       )
    return results
 
-# this gonna throw RequestFailed(20, 'IllegalArgumentException') if category is unknown
-# and doesn't accept trailers category
 def get_filmweb_productions(category, offset=0, limit=100):
+   """Returns newest Filmweb productions from given category.
+
+   :param int offset: (optional) start position
+   :param int limit: (optional) maximum of results
+
+   :return: list
+
+   .. code:: python
+
+      [
+         {
+            'category_description': '',
+            'videos': [Video(uid, category, name, date, img, min_age, vid_urls)]
+         }
+      ]
+
+   This gonna throw RequestFailed(20, 'IllegalArgumentException') if category is unknown.
+   """
    unk = -1
    category = category.lower().replace(' ', '_')
    data = Filmweb._request('getFilmwebProductions', [unk, category, offset, limit])
