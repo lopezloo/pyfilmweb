@@ -4,7 +4,7 @@ import json
 import requests
 
 from . import common, exceptions
-from .Items import *
+from .items import *
 
 def _request(method, params=[]):
    params = [v if v is not None else 'null' for v in params]
@@ -61,10 +61,10 @@ def search(query):
          elif item_type == 'g':
             ftype = 'videogame'
 
-         item = Film(uid=v[1], type=ftype, name=v[4], poster=v[2][:-6] if v[2] else None, name_org=v[3], year=v[6])
+         item = Film(uid=v[1], type=ftype, name=v[4], poster=common.poster_path_to_relative(v[2]), name_org=v[3], year=v[6])
 
       elif item_type == 'p':
-         item = Person(uid=v[1], name=v[3], poster=v[2][:-6] if v[2] else None)
+         item = Person(uid=v[1], name=v[3], poster=common.poster_path_to_relative(v[2]))
 
       elif item_type == 't':
          item = Channel(uid=v[1], name=v[2])
@@ -77,37 +77,37 @@ def search(query):
    return items
 
 def get_popular_films():
-   """Returns (how many?) popular films
+   """Returns 100 popular films.
 
    :return: list of :class:`Films`'s
    """
-   data = Filmweb._request('getPopularFilms')
+   data = _request('getPopularFilms')
 
    films = []
    for v in data:
-      films.append(Film(name=v[0], year=v[1], rate=v[2], votes=v[3], poster=v[5][:-6], uid=v[6]))
+      films.append(Film(name=v[0], year=v[1], rate=v[2], votes=v[3], poster=common.poster_path_to_relative(v[5]), uid=v[6]))
 
    return films
 
 def get_popular_persons():
-   """Returns (how many?) popular persons
+   """Returns 100 popular persons.
 
    :return: list of :class:`Person`'s
    """
-   data = Filmweb._request('getPopularPersons')
+   data = _request('getPopularPersons')
 
    persons = []
    for v in data:
-      persons.append(Person(v[0], v[1], v[2][:-6]))
+      persons.append(Person(v[0], v[1], poster=common.poster_path_to_relative(v[2])))
 
    return persons
 
 def get_top(film_type, genre=None, worldwide=True):
-   """Returns TOP N (how many?) popular :class:`Film`'s
+   """Returns TOP 500 popular films.
 
-   :param str film_type: :class:`Film` object type (film, serial, videogame)
-   :param str genre: (optional) genre name (ignored if film_type==videogame)
-   :param bool worldwide: (optional) determines if returned top :class:`Film`'s should be from any country or only Poland (can't be False if film_type==videogame)
+   :param str film_type: :class:`Film` type (film, serial, videogame)
+   :param str genre: genre name (ignored if film_type==videogame)
+   :param bool worldwide: determines if returned top :class:`Film`'s should be from any country or only Poland (can't be False if film_type==videogame)
 
    :return: list of results
 
@@ -116,8 +116,8 @@ def get_top(film_type, genre=None, worldwide=True):
       [
          {
             'film': Film(uid, type, rate, votes),
-            'position': 5,
-            'position_prev': 3
+            'position': int(),
+            'position_prev': int()
          }
       ]
 
@@ -134,7 +134,7 @@ def get_top(film_type, genre=None, worldwide=True):
       raise ValueError('videogame type doesn\'t support worldwide=False')
 
    req = 'top_100_{}s_{}'.format('game' if film_type == 'videogame' else film_type, 'world' if worldwide else 'poland')
-   data = Filmweb._request('getRankingFilms', [req, genre_id])
+   data = _request('getRankingFilms', [req, genre_id])
 
    results = []
    for v in data:
@@ -161,7 +161,7 @@ def get_upcoming_films(above_date=None):
             'films': [
                {
                   'film': Film(uid, name, year, poster),
-                  'person_names': [person1_name, person2_name]
+                  'person_names': [str(), str()]
                }
             ]
          }
@@ -170,14 +170,14 @@ def get_upcoming_films(above_date=None):
    """
 
    # Nice typo, Filmweb!
-   data = Filmweb._request('getUpcommingFilms', [above_date])
+   data = _request('getUpcommingFilms', [above_date])
 
    results = []
    for day in data:
       films = []
       for v in day[1]:
          films.append({
-            'film': Film(uid=v[0], name=v[1], year=v[2], poster=v[3][:-6] if v[3] else None),
+            'film': Film(uid=v[0], name=v[1], year=v[2], poster=common.poster_path_to_relative(v[3])),
             'person_names': [v[4], v[5]]
          })
 
@@ -194,21 +194,21 @@ def get_born_today_persons():
 
    :return: list of :class:`Person`'s
    """
-   data = Filmweb._request('getBornTodayPersons')
+   data = _request('getBornTodayPersons')
    results = []
    for v in data:
-      results.append(Person(uid=v[0], name=v[1], poster=v[2][:-6] if v[2] else None, date_birth=common.str_to_date(v[3]), date_death=common.str_to_date(v[4])))
+      results.append(Person(uid=v[0], name=v[1], poster=common.poster_path_to_relative(v[2]), date_birth=common.str_to_date(v[3]), date_death=common.str_to_date(v[4])))
    return results
 
 def get_trailers(offset=0, limit=10):
    """Returns trailer from newest.
 
-   :param int offset: (optional) start position
-   :param int limit: (optional) maximum of results
+   :param int offset: start position
+   :param int limit: maximum of results
 
    :return: list of :class:`Video`'s
    """
-   data = Filmweb._request('getTrailers', [offset, limit])
+   data = _request('getTrailers', [offset, limit])
    results = []
    for v in data:
       img = v[3]
@@ -220,7 +220,7 @@ def get_trailers(offset=0, limit=10):
          '720p': v[8]
       }
 
-      film = Film(uid=v[2], name=v[0], poster=v[5][:-6] if v[5] else None)
+      film = Film(uid=v[2], name=v[0], poster=common.poster_path_to_relative(v[5]))
       results.append(
          Video(film=film, date=common.str_to_date(v[1]), img=img, name=v[6], min_age=v[9], vid_uid=vid_uid, vid_urls=vid_urls)
       )
@@ -229,12 +229,12 @@ def get_trailers(offset=0, limit=10):
 def get_popular_trailers(offset=0, limit=10):
    """Returns popular trailers.
 
-   :param int offset: (optional) start position
-   :param int limit: (optional) maximum of results
+   :param int offset: start position
+   :param int limit: maximum of results
 
    :return: list of :class:`Video`'s
    """
-   data = Filmweb._request('getPopularTrailers', [offset, limit])
+   data = _request('getPopularTrailers', [offset, limit])
    results = []
    for v in data:
       img = v[3]
@@ -246,17 +246,17 @@ def get_popular_trailers(offset=0, limit=10):
          '720p': v[7]
       }
 
-      film = Film(uid=v[2], name=v[0], poster=v[5][:-6] if v[5] else None)
+      film = Film(uid=v[2], name=v[0], poster=common.poster_path_to_relative(v[5]))
       results.append(
          Video(uid=uid, name=v[6], film=film, date=common.str_to_date(v[1]), img=img, min_age=v[9], vid_urls=vid_urls)
       )
    return results
 
-def get_filmweb_productions(category, offset=0, limit=100):
+def get_filmweb_productions(category, offset=0, limit=10):
    """Returns newest Filmweb productions from given category.
 
-   :param int offset: (optional) start position
-   :param int limit: (optional) maximum of results
+   :param int offset: start position
+   :param int limit: maximum of results
 
    :return: list
 
@@ -264,16 +264,17 @@ def get_filmweb_productions(category, offset=0, limit=100):
 
       [
          {
-            'category_description': '',
+            'category_description': str(),
             'videos': [Video(uid, category, name, date, img, min_age, vid_urls)]
          }
       ]
 
-   This gonna throw RequestFailed(20, 'IllegalArgumentException') if category is unknown.
+   .. note::
+      This gonna throw :class:`exceptions.RequestFailed` (20, 'IllegalArgumentException') if category is unknown.
    """
    unk = -1
    category = category.lower().replace(' ', '_')
-   data = Filmweb._request('getFilmwebProductions', [unk, category, offset, limit])
+   data = _request('getFilmwebProductions', [unk, category, offset, limit])
 
    result = {
      #'unk': data[0],

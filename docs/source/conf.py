@@ -152,5 +152,4 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-
-
+autodoc_member_order = 'bysource'

@@ -203,3 +203,7 @@ def video_img_url_to_uid(url):
          return int(r.group(1))
       else:
          print('Unknown img url: {}'.format(url))
+
+def poster_path_to_relative(path):
+   if path:
+      return path[:-6]
