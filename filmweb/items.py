@@ -7,13 +7,13 @@ from datetime import datetime
 class Film:
    def __init__(self, uid, type='unknown', name=None, poster=None, name_org=None, year=None, rate=None, votes=None, duration=None):
       self.uid = uid
-      self.type = type
+      self.type = type #: film, serial or videogame.
       self.name = name #: Localized name.
       self.poster = poster if poster != '' else None #: Relative poster path, use :func:`get_poster` for absolute path.
       self.name_org = name_org #: Original name.
       self.year = year
       self.rate = rate
-      self.votes = votes
+      self.votes = votes #: Amount of how many people voted on this film.
       self.duration = duration #: Duration in minutes.
 
    def __repr__(self):
@@ -27,13 +27,13 @@ class Film:
          return '{}/entityLink?entityName={}&id={}'.format(common.URL, self.type, self.uid)
 
    def get_poster(self, size='small'):
-      assert isinstance(size, str)
-      """Returns absolute URL of specified size poster.
+      """Returns absolute path of specified size poster.
 
       :param str size: poster size (see common.poster_sizes)
       :return: URL
       :rtype: str or None      
       """
+      assert isinstance(size, str)
       if self.poster:
          return '{}/po{}.{}.jpg'.format(common.URL_CDN, self.poster, common.poster_sizes[size])
 
@@ -62,7 +62,7 @@ class Film:
             'genres':            [],
             'year':              str(),
             'duration':          int(), # in minutes
-            'discussion_url':    str(), # absolute url
+            'discussion_url':    str(),
             'has_review':        bool(),
             'has_description':   bool(),
             'poster_small':      str(),
@@ -76,7 +76,7 @@ class Film:
             'description_short': str(),
             'top_pos':           int(),
             'wanna_see_count':   int(),
-            'not_interested_count': int(),
+            'not_interested_count': int(), # unconfirmed
             'recommended':       bool()
             'curiosities_count': int(),
             'boxoffice':         int(),
@@ -296,6 +296,7 @@ class Person:
       :return: URL
       :rtype: str or None
       """
+      assert size in ['small', 'tiny']
       if self.poster:
          return '{}/p{}.{}.jpg'.format(common.URL_CDN, self.poster, 0 if size == 'tiny' else 1)
 
@@ -456,6 +457,12 @@ class Image:
       self.sources = sources
 
    def get_url(self, size='medium'):
+      """Returns absolute path for image of given size.
+
+      :param str size: size, see common.image_sizes
+      :return: URL
+      :rtype: str
+      """
       return '{}/ph{}.{}.jpg'.format(common.URL_CDN, self.path, common.image_sizes[size])
 
 class Channel:
@@ -487,8 +494,26 @@ class Channel:
       assert size in common.channel_icon_sizes
       return '{}/channels/{}.{}.png'.format(common.URL_CDN, self.uid, common.channel_icon_sizes[size])
 
-   # date: max +13, min -1 days
    def get_schedule(self, date):
+      """Returns channel schedule for given date.
+
+      :param date date: date (min -1, max +13 days)
+      :return: schedule
+      :rtype: list
+
+      .. code:: python
+
+         [
+            {
+               'uid': int(),
+               'title': str(),
+               'description': str(),
+               'time': str(), # HH-MM
+               'type': str(),
+               'film': None or Film(uid, name, year, duration, poster)
+            }
+         ]
+      """
       data = filmweb.filmweb._request('getTvSchedule', [self.uid, str(date)])
 
       results = []
@@ -523,7 +548,7 @@ class Video:
          return '{}/video/{}/{}-{}'.format(common.URL, self.category or 'zwiastun', self.name.replace(' ', '+') or 'A', self.uid)
 
    def get_video(self, size='main'):
-      """Returns absolute URL of specified quality video.
+      """Returns absolute path of specified quality video.
 
       :param str size: quality (main, 480p, 720p)
       :return: URL

@@ -10,6 +10,7 @@ Table of Contents
 
 * :doc:`filmweb`
 * Classes
+
  * :doc:`film`
  * :doc:`person`
  * :doc:`image`

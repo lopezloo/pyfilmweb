@@ -1,5 +1,5 @@
-Filmweb
+filmweb
 =======
 
-.. automodule:: Filmweb.Filmweb
+.. automodule:: filmweb.filmweb
 	:members:
