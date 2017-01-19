@@ -179,7 +179,8 @@ film_type_ids = {
 }
 
 def get_film_type_id(film_name):
-   return film_type_ids[film_name]
+   if film_name in film_type_ids:
+      return film_type_ids[film_name]
 
 def get_film_type_name(film_id):
    return film_types[film_id]
