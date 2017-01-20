@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import filmweb
-from . import common
+from . import common, exceptions
 from datetime import datetime
 
 class Object:
    def _request(self, method, params=[], hmethod='GET'):
       return self.fw._request(method, params, hmethod)
+
+   def check_auth(self):
+      if self.fw.session is None:
+         raise exceptions.NotAuthenticated
 
 class Film(Object):
    def __init__(self, fw, uid, type='unknown', name=None, poster=None, name_org=None, year=None, rate=None, votes=None, duration=None):
@@ -637,7 +641,34 @@ class User(Object):
       self.uid_fb = uid_fb
       self.name_full = name_full
 
-   def get_votes(self):
+   def get_info(self):
+      """Returns basic info about user and updates object parameters.
+
+      :return: basic info
+      :rtype: dict
+
+      .. code:: python
+
+         {
+            'name': str(),
+            'img': str() or None
+         }
+      """
+      self.check_auth()
+      # (this accept few uids)
+      data = self._request('getUsersInfoShort', [[self.uid]])
+
+      uinfo = data[0]
+      result = {
+         'name': uinfo[0],
+         'img': common.poster_path_to_relative(uinfo[1]),
+        #'uid': uinfo[1]
+      }
+      self.name = result['name']
+      self.img = result['img']
+      return result
+
+   def get_film_votes(self):
       """Returns unsorted film votes.
 
       :return: film votes
@@ -656,8 +687,10 @@ class User(Object):
          ]
 
       .. note::
-         This user need to have public votes or be authenticated user friend.
+         This user need to have public votes or be friend with authenticated user.
+         Gonna raise exceptions.RequestFailed: ('exc', 'PermissionDeniedException') otherwise.
       """
+      self.check_auth()
       unk = -1
       data = self._request('getUserFilmVotes', [self.uid, unk])
 
@@ -669,7 +702,125 @@ class User(Object):
             'date': common.str_to_date(v[1]),
             'rate': v[2],
             'favorite': bool(v[3]),
-            'comment': v[4] # used?
+            'comment': v[4]
          })
 
       return results
+
+   def get_want_to_see(self):
+      """Returns list with wanted to see films.
+
+      .. code:: python
+
+         [
+            {
+               'film': Film(uid, type),
+               'datetime': datetime(),
+               'level': int() # 1-5
+            }
+         ]
+
+      .. note::
+         This user needs to be friend with authenticated user.
+         Gonna raise exceptions.RequestFailed: ('exc', 'PermissionDeniedException') otherwise.
+      """
+      self.check_auth()
+      unk = -1
+      data = self._request('getUserFilmsWantToSee', [self.uid, unk])
+
+      #unk = data[0]
+      results = []
+      for v in data[1:]:
+         results.append({
+            'film': Film(fw=self.fw, uid=v[0], type=common.get_film_type_name(v[3])),
+            'datetime': datetime.fromtimestamp(v[1]/1000), # WTF
+            'level': v[2]
+         })
+
+      return results
+
+class LoggedUser(User):
+   def get_friends(self):
+      """Returns friends.
+
+      :return: friends
+      :rtype: list
+
+      .. code:: python
+
+         [
+            {
+               'user': User(uid, name, img, sex, uid_fb, name_full),
+               'similarity': int() or None,
+               'following': bool()
+            }
+         ]
+      """
+      self.check_auth()
+      data = self._request('getUserFriends')
+
+      results = []
+      for v in data:
+         results.append({
+            'user': User(fw=self.fw, uid=v[4], name=v[0], img=v[1], sex=v[6], uid_fb=v[5], name_full=v[3]),
+            'similarity': v[2],
+            'following': bool(v[7])
+         })
+
+      return results
+
+   def get_person_votes(self):
+      self.check_auth()
+      unk = -1
+      data = self._request('getUserPersonVotes', [self.uid, unk])
+
+      #unk = data[0]
+      results = []
+      for v in data[1:]:
+         results.append({
+            'person': Person(fw=self.fw, uid=v[0]),
+            'datetime': datetime.fromtimestamp(v[1]/1000),
+            'rate': v[2],
+            'favorite': bool(v[3])
+         })
+
+      return results
+
+   def remove_film_vote(self, film):
+      """Removes film vote.
+
+      :param class:`Film`: film
+      """
+      #self.set_film_vote(self, film=film, rate=-1, favorite=False, comment='')
+      self._request('removeUserFilmVote', [film.uid], hmethod='POST')
+
+   def set_film_vote(self, film, rate, favorite=False, comment=''):
+      """Sets film vote.
+
+      :param class:`Film`: film
+      :param int rate: rate (0 = seen but no rate, 1 - 10 = rates)
+      :param bool favorite: favorite
+      :param str comment: film comment (max length = 160)
+
+      .. note:: python
+         * Raises :class:`ValueError` if comment length is greater than 160 characters.
+         * It's not possible to remove comment using this. You need remove entire vote first.
+      """
+      assert isinstance(film, Film)
+      assert isinstance(rate, int)
+      assert isinstance(favorite, bool)
+      assert isinstance(comment, str)
+      if len(comment) > 160:
+         raise ValueError('Comment max length is 160.')
+
+      self.check_auth()
+      self._request('addUserFilmVote', [[film.uid, rate, comment, int(favorite)]], hmethod='POST')
+
+   def set_want_to_see(self, film, level=3):
+      """Mark film as wanted to see.
+
+      :param class:`Film`: film
+      :param int level: level (0-5)
+      """
+      self.check_auth()
+      self._request('addUserFilmWantToSee', [film.uid, level], hmethod='POST')

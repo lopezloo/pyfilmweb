@@ -23,7 +23,7 @@ class Filmweb:
 
       remember = True
       data = self._request('login', [name, password, int(remember)], hmethod='POST')
-      return User(fw=self, uid=data[3], name=data[0], img=common.poster_path_to_relative(data[1]), sex=data[4], birth_date=data[5])
+      return LoggedUser(fw=self, uid=data[3], name=data[0], img=common.poster_path_to_relative(data[1]), sex=data[4], birth_date=data[5])
 
    # This method is one big TODO.
    def _request(self, method, params=[], hmethod='GET'):
@@ -56,6 +56,10 @@ class Filmweb:
 
       if data[1][:3] == 'exc':
          raise exceptions.RequestFailed('exc', data[1][4:])
+
+      # Everything okay, just 0 results
+      if data[1] == 'null':
+         return []
 
       if hmethod == 'GET':
          if data[1][-1:] == 's':
@@ -95,13 +99,13 @@ class Filmweb:
             elif item_type == 'g':
                ftype = 'videogame'
 
-            item = Film(fw=self, uid=v[1], type=ftype, name=v[4], poster=common.poster_path_to_relative(v[2]), name_org=v[3], year=v[6])
+            item = Film(fw=self, uid=int(v[1]), type=ftype, name=v[4], poster=common.poster_path_to_relative(v[2]), name_org=v[3], year=v[6])
 
          elif item_type == 'p':
-            item = Person(fw=self, uid=v[1], name=v[3], poster=common.poster_path_to_relative(v[2]))
+            item = Person(fw=self, uid=int(v[1]), name=v[3], poster=common.poster_path_to_relative(v[2]))
 
          elif item_type == 't':
-            item = Channel(fw=self, uid=v[1], name=v[2])
+            item = Channel(fw=self, uid=int(v[1]), name=v[2])
 
          elif item_type == 'c':
             item = Cinema(fw=self, uid=int(v[1]), name=v[2], city_name=v[3], address=v[4], coords=v[5])
