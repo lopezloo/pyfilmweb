@@ -334,3 +334,25 @@ class Filmweb:
          })
 
       return result
+
+   def update_films_info(self, films):
+      """Updates multiple film instances with basic info (name, year, rate, votes, duration, poster).
+
+      :param list films: list of :class:`Film`'s instances (max = 100)
+      """
+      assert isinstance(films, list)
+      if len(films) > 100:
+         raise ValueError('Too much.')
+
+      uids = []
+      for film in films:
+         uids.append(film.uid)
+
+      data = self._request('getFilmsInfoShort', [uids])
+      for k, v in enumerate(data):
+         films[k].name = v[0]
+         films[k].year = v[1]
+         films[k].rate = v[2]
+         films[k].votes = v[3]
+         films[k].duration = v[4]
+         films[k].poster = common.poster_path_to_relative(v[5])

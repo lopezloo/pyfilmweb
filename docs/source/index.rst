@@ -5,15 +5,14 @@ Welcome to pyfilmweb's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-Table of Contents
+Classes
 ==================
 
 * :doc:`filmweb`
-* Classes
-
- * :doc:`film`
- * :doc:`person`
- * :doc:`image`
- * :doc:`video`
- * :doc:`channel`
- * :doc:`cinema`
+* :doc:`film`
+* :doc:`person`
+* :doc:`image`
+* :doc:`video`
+* :doc:`channel`
+* :doc:`cinema`
+* :doc:`user`

@@ -14,7 +14,7 @@ class Object:
 
 class Film(Object):
    def __init__(self, fw, uid, type='unknown', name=None, poster=None, name_org=None, year=None, rate=None, votes=None, duration=None):
-      self.fw = fw #: class:`Filmweb` instance
+      self.fw = fw #: :class:`Filmweb` instance
       self.uid = uid
       self.type = type #: film, serial or videogame.
       self.name = name #: Localized name.
@@ -92,6 +92,9 @@ class Film(Object):
             'boxoffice_top_pos': int(),
             'budget':            int()
          }
+
+      .. note::
+         You can use :func:`Filmweb.update_films_info` if you want get basic info about multiple Film instances with only one request.
       """
       data = self._request('getFilmInfoFull', [self.uid])
 
@@ -279,7 +282,7 @@ class Film(Object):
 
 class Person(Object):
    def __init__(self, fw, uid, name=None, poster=None, rate=None, votes=None, date_birth=None, date_death=None):
-      self.fw = fw #: class:`Filmweb` instance
+      self.fw = fw #: :class:`Filmweb` instance
       self.uid = uid
       self.name = name
       self.poster = poster #: Relative poster path, use get_poster() for absolute path
@@ -461,7 +464,7 @@ class Person(Object):
 
 class Image(Object):
    def __init__(self, fw, path, associated_film=None, persons=[], sources=[]):
-      self.fw = fw #: class:`Filmweb` instance
+      self.fw = fw #: :class:`Filmweb` instance
       self.path = path #: Relative path, use :func:`get_url` for absolute
       self.associated_film = associated_film #: :class:`Film` instance
       self.persons = persons #: list of :class:`Person` instances
@@ -478,7 +481,7 @@ class Image(Object):
 
 class Channel(Object):
    def __init__(self, fw, uid, name=None):
-      self.fw = fw #: class:`Filmweb` instance
+      self.fw = fw #: :class:`Filmweb` instance
       self.uid = uid
       self.name = name
 
@@ -542,7 +545,7 @@ class Channel(Object):
 
 class Video(Object):
    def __init__(self, fw, uid, category=None, film=None, date=None, img=None, name=None, min_age=None, vid_urls=[]):
-      self.fw = fw #: class:`Filmweb` instance
+      self.fw = fw #: :class:`Filmweb` instance
       self.uid = uid
       self.category = category
       self.film = film
@@ -573,7 +576,7 @@ class Video(Object):
 
 class Cinema(Object):
    def __init__(self, fw, uid, name=None, city_name=None, address=None, coords=None):
-      self.fw = fw #: class:`Filmweb` instance
+      self.fw = fw #: :class:`Filmweb` instance
       self.uid = uid
       self.name = name
       self.city_name = city_name
@@ -632,7 +635,7 @@ class Cinema(Object):
 
 class User(Object):
    def __init__(self, fw, uid=None, name=None, img=None, sex=None, birth_date=None, uid_fb=None, name_full=None):
-      self.fw = fw #: class:`Filmweb` instance
+      self.fw = fw #: :class:`Filmweb` instance
       self.uid = uid
       self.name = name
       self.img = img
@@ -687,8 +690,9 @@ class User(Object):
          ]
 
       .. note::
-         This user need to have public votes or be friend with authenticated user.
-         Gonna raise exceptions.RequestFailed: ('exc', 'PermissionDeniedException') otherwise.
+         * This user need to have public votes or be friend with authenticated user. Gonna raise :func:`exceptions.RequestFailed` ('exc', 'PermissionDeniedException') otherwise.
+         * This doesn't result film name. See :func:`Filmweb.update_films_info`
+
       """
       self.check_auth()
       unk = -1
@@ -721,8 +725,9 @@ class User(Object):
          ]
 
       .. note::
-         This user needs to be friend with authenticated user.
-         Gonna raise exceptions.RequestFailed: ('exc', 'PermissionDeniedException') otherwise.
+         * This user needs to be friend with authenticated user. Gonna raise :func:`exceptions.RequestFailed` ('exc', 'PermissionDeniedException') otherwise.
+         * This doesn't result film name. Use :func:`Filmweb.update_films_info`.
+
       """
       self.check_auth()
       unk = -1
@@ -789,7 +794,7 @@ class LoggedUser(User):
    def remove_film_vote(self, film):
       """Removes film vote.
 
-      :param class:`Film`: film
+      :param :class:`Film` film: film
       """
       #self.set_film_vote(self, film=film, rate=-1, favorite=False, comment='')
       self._request('removeUserFilmVote', [film.uid], hmethod='POST')
@@ -797,14 +802,15 @@ class LoggedUser(User):
    def set_film_vote(self, film, rate, favorite=False, comment=''):
       """Sets film vote.
 
-      :param class:`Film`: film
+      :param :class:`Film` film: film
       :param int rate: rate (0 = seen but no rate, 1 - 10 = rates)
       :param bool favorite: favorite
       :param str comment: film comment (max length = 160)
 
-      .. note:: python
+      .. note::
          * Raises :class:`ValueError` if comment length is greater than 160 characters.
          * It's not possible to remove comment using this. You need remove entire vote first.
+
       """
       assert isinstance(film, Film)
       assert isinstance(rate, int)
@@ -819,7 +825,7 @@ class LoggedUser(User):
    def set_want_to_see(self, film, level=3):
       """Mark film as wanted to see.
 
-      :param class:`Film`: film
+      :param :class:`Film` film: film
       :param int level: level (0-5)
       """
       self.check_auth()
