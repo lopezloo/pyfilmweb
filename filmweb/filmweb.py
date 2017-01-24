@@ -6,6 +6,8 @@ import requests
 from . import common, exceptions
 from .items import *
 
+import logging
+
 class Filmweb:
    def __init__(self):
       self.session = None
@@ -29,7 +31,7 @@ class Filmweb:
    def _request(self, method, params=[], hmethod='GET'):
       params = [v if v is not None else 'null' for v in params]
       data_str = '{} {}\n'.format(method, str(params))
-      print(data_str)
+      logging.debug('Calling {}'.format(data_str))
 
       sig = '{},{}'.format(common.API_VER, md5((data_str + 'android' + common.API_KEY).encode()).hexdigest())
       rparams = {
@@ -45,7 +47,6 @@ class Filmweb:
       elif hmethod == 'POST':
          r = o.post(common.URL_API, data=rparams)
 
-      print(r.text.encode('utf-8'))
       data = r.text.split('\n')
       status = data[0].split(',')
 
