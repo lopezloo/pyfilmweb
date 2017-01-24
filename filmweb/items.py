@@ -251,7 +251,7 @@ class Film(Object):
       for v in data:
          results.append({
             'channel': Channel(fw=self.fw, uid=v[1]),
-            'datetime': datetime.strptime(v[3]+v[2], '%Y-%m-%d%H:%M'),
+            'datetime': common.str_to_datetime(v[3]+v[2], '%Y-%m-%d%H:%M'),
             'uid': v[4]
          })
 
