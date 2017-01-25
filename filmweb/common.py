@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import _strptime
 from datetime import datetime
 import time
 import re
