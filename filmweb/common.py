@@ -216,6 +216,12 @@ def video_img_url_to_uid(url):
       else:
          print('Unknown img url: {}'.format(url))
 
+def sex_id_to_str(uid):
+   if uid == 1:
+      return 'F'
+   elif uid == 2:
+      return 'M'
+
 def poster_path_to_relative(path):
    if path:
       return path[:-6]

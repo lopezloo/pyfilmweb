@@ -281,7 +281,7 @@ class Film(Object):
       return results
 
 class Person(Object):
-   def __init__(self, fw, uid, name=None, poster=None, rate=None, votes=None, date_birth=None, date_death=None):
+   def __init__(self, fw, uid, name=None, poster=None, rate=None, votes=None, date_birth=None, date_death=None, sex=None):
       self.fw = fw #: :class:`Filmweb` instance
       self.uid = uid
       self.name = name
@@ -290,6 +290,7 @@ class Person(Object):
       self.votes = votes
       self.date_birth = date_birth
       self.date_death = date_death
+      self.sex = sex #: F/M
 
    @property
    def type(self):
@@ -334,13 +335,13 @@ class Person(Object):
          {
             'name': str(),
             'birth_date': date(),
-            'birth_place': date(),
+            'birth_place': str(),
             'votes': int(),
             'rate': float(),
             'poster': str(),
             'has_bio': bool(),
             'film_known_for': Film(uid),
-            'sex': int(),
+            'sex': str(), # F/M
             'name_full': str(),
             'death_date': date(),
             'height': int(),
@@ -351,16 +352,16 @@ class Person(Object):
       result = {
          'name': data[0],
          'birth_date': common.str_to_date(data[1]),
-         'birth_place': common.str_to_date(data[2]),
+         'birth_place': data[2],
          'votes': data[3],
          'rate': data[4],
          'poster': common.poster_path_to_relative(data[5]),
-         'has_bio': data[6],
+         'has_bio': bool(data[6]),
          'film_known_for': Film(fw=self.fw, uid=data[7]) if data[7] else None,
-         'sex': data[8],
+         'sex': common.sex_id_to_str(data[8]),
          'name_full': data[9],
          'death_date': data[10],
-         'height': data[11],
+         'height': int(data[11]) if data[11] else None,
       }
 
       # Update object
@@ -370,6 +371,7 @@ class Person(Object):
       self.votes = result['votes']
       self.date_birth = result['birth_date']
       self.date_death = result['death_date']
+      self.sex = result['sex']
       return result
 
    def get_images(self, offset=0):
@@ -639,7 +641,7 @@ class User(Object):
       self.uid = uid
       self.name = name
       self.img = img
-      self.sex = sex
+      self.sex = sex #: F/M
       self.birth_date = birth_date
       self.uid_fb = uid_fb
       self.name_full = name_full
