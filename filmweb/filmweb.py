@@ -290,6 +290,31 @@ class Filmweb:
          )
       return results
 
+   def get_video_categories(self):
+      """Returns Filmweb productions categories.
+
+      :return: list of categories
+
+      .. code:: python
+
+         [
+            {
+               'name': str(),
+               'name_friendly': str(),
+               'description': str()
+            }
+         ]
+      """
+      data = self._request('getVideoConfiguration')
+      results = []
+      for v in data:
+         results.append({
+            'name':           v[0],
+            'name_friendly':  v[1],
+            'description':    v[2]
+         })
+      return results
+
    def get_filmweb_productions(self, category, offset=0, limit=10):
       """Returns newest Filmweb productions from given category.
 
