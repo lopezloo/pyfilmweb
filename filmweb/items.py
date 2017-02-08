@@ -75,7 +75,7 @@ class Film(Object):
          result = {
             'title': data[4],
             'content': data[3],
-            'author': User(fw=self.fw, uid=data[1], name=data[0], img=common.poster_path_to_relative(data[2])),
+            'author': User(fw=self.fw, uid=data[1], name=data[0], img=common.img_path_to_relative(data[2])),
          }
          return result
 
@@ -176,7 +176,7 @@ class Film(Object):
       self.votes = result['votes']
       self.duration = result['duration']
       if result['poster_small']:
-         self.poster = common.poster_path_to_relative(result['poster_small'])
+         self.poster = common.img_path_to_relative(result['poster_small'])
 
       return result
 
@@ -207,7 +207,7 @@ class Film(Object):
       results = []
       for v in data:
          results.append({
-            'person': Person(fw=self.fw, uid=v[0], name=v[3], poster=common.poster_path_to_relative(v[4])),
+            'person': Person(fw=self.fw, uid=v[0], name=v[3], poster=common.img_path_to_relative(v[4])),
             'role': v[1],
             'role_extra_info': v[2]
          })
@@ -229,9 +229,9 @@ class Film(Object):
          # If this image has marked persons on it
          if v[1]:
             for pdata in v[1]:
-               persons.append(Person(fw=self.fw, uid=pdata[0], name=pdata[1], poster=common.poster_path_to_relative(pdata[2])))
+               persons.append(Person(fw=self.fw, uid=pdata[0], name=pdata[1], poster=common.img_path_to_relative(pdata[2])))
 
-         results.append(Image(fw=self.fw, path=common.poster_path_to_relative(v[0]), sources=v[2], associated_film=self, persons=persons))
+         results.append(Image(fw=self.fw, path=common.img_path_to_relative(v[0]), sources=v[2], associated_film=self, persons=persons))
 
       return results
 
@@ -379,7 +379,7 @@ class Person(Object):
          'birth_place': data[2],
          'votes': data[3],
          'rate': data[4],
-         'poster': common.poster_path_to_relative(data[5]),
+         'poster': common.img_path_to_relative(data[5]),
          'has_bio': bool(data[6]),
          'film_known_for': Film(fw=self.fw, uid=data[7]) if data[7] else None,
          'sex': common.sex_id_to_str(data[8]),
@@ -415,9 +415,9 @@ class Person(Object):
          # If this image has marked persons on it
          if v[1]:
             for pdata in v[1]:
-               persons.append(Person(fw=self.fw, uid=pdata[0], name=pdata[1], poster=common.poster_path_to_relative(pdata[2])))
+               persons.append(Person(fw=self.fw, uid=pdata[0], name=pdata[1], poster=common.img_path_to_relative(pdata[2])))
 
-         results.append(Image(fw=self.fw, path=common.poster_path_to_relative(v[0]), sources=v[2], associated_film=Film(fw=self.fw, uid=v[3], name=v[4]), persons=persons))
+         results.append(Image(fw=self.fw, path=common.img_path_to_relative(v[0]), sources=v[2], associated_film=Film(fw=self.fw, uid=v[3], name=v[4]), persons=persons))
 
       return results
 
@@ -565,7 +565,7 @@ class Channel(Object):
             'description': v[2],
             'time': v[3], # HH-MM
             'type': v[4],
-            'film': Film(fw=self.fw, uid=v[5], name=v[1], year=v[6], duration=v[7], poster=common.poster_path_to_relative(v[8])) if v[5] else None
+            'film': Film(fw=self.fw, uid=v[5], name=v[1], year=v[6], duration=v[7], poster=common.img_path_to_relative(v[8])) if v[5] else None
          })
       return results
 
@@ -649,7 +649,7 @@ class Cinema(Object):
       films = {}
       for v in films_data:
          uid = v[6]
-         films[uid] = Film(fw=self.fw, name=v[0], year=v[1], rate=v[2], votes=v[3], duration=v[4], poster=common.poster_path_to_relative([5]), uid=uid)
+         films[uid] = Film(fw=self.fw, name=v[0], year=v[1], rate=v[2], votes=v[3], duration=v[4], poster=common.img_path_to_relative([5]), uid=uid)
 
       results = []
       # For all seances
@@ -671,7 +671,7 @@ class User(Object):
       self.fw = fw #: :class:`Filmweb` instance
       self.uid = uid
       self.name = name
-      self.img = img
+      self.img = img #: Relative avatar path, use get_avatar() for absolute path
       self.sex = sex #: F/M
       self.birth_date = birth_date
       self.uid_fb = uid_fb
@@ -683,6 +683,17 @@ class User(Object):
          return '{}/user/{}'.format(common.URL, self.name.replace(' ', '+'))
       else:
          return '{}/entityLink?entityName=user&id={}'.format(common.URL, self.uid)
+
+   def get_avatar(self, size='big'):
+      """Returns absolute URL of specified size avatar.
+
+      :param str size: poster size (see common.image_sizes)
+      :return: URL
+      :rtype: str or None
+      """
+      assert size in common.image_sizes
+      if self.img:
+         return '{}/u{}.{}.jpg'.format(common.URL_CDN, self.img, common.image_sizes[size])
 
    def get_info(self):
       """Returns basic info about user and updates object parameters.
@@ -704,7 +715,7 @@ class User(Object):
       uinfo = data[0]
       result = {
          'name': uinfo[0],
-         'img': common.poster_path_to_relative(uinfo[1]),
+         'img': common.img_path_to_relative(uinfo[1]),
         #'uid': uinfo[1]
       }
       self.name = result['name']
@@ -807,7 +818,7 @@ class LoggedUser(User):
       results = []
       for v in data:
          results.append({
-            'user': User(fw=self.fw, uid=v[4], name=v[0], img=v[1], sex=v[6], uid_fb=v[5], name_full=v[3]),
+            'user': User(fw=self.fw, uid=v[4], name=v[0], img=common.img_path_to_relative(v[1]), sex=v[6], uid_fb=v[5], name_full=v[3]),
             'similarity': v[2],
             'following': bool(v[7])
          })

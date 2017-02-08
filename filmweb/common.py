@@ -222,6 +222,6 @@ def sex_id_to_str(uid):
    elif uid == 2:
       return 'M'
 
-def poster_path_to_relative(path):
+def img_path_to_relative(path):
    if path:
       return path[:-6]

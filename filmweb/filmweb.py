@@ -25,7 +25,7 @@ class Filmweb:
 
       remember = True
       data = self._request('login', [name, password, int(remember)], hmethod='POST')
-      return LoggedUser(fw=self, uid=data[3], name=data[0], img=common.poster_path_to_relative(data[1]), sex=data[4], birth_date=data[5])
+      return LoggedUser(fw=self, uid=data[3], name=data[0], img=common.img_path_to_relative(data[1]), sex=data[4], birth_date=data[5])
 
    # This method is one big TODO.
    def _request(self, method, params=[], hmethod='GET'):
@@ -100,10 +100,10 @@ class Filmweb:
             elif item_type == 'g':
                ftype = 'videogame'
 
-            item = Film(fw=self, uid=int(v[1]), type=ftype, name=v[4], poster=common.poster_path_to_relative(v[2]), name_org=v[3], year=v[6])
+            item = Film(fw=self, uid=int(v[1]), type=ftype, name=v[4], poster=common.img_path_to_relative(v[2]), name_org=v[3], year=v[6])
 
          elif item_type == 'p':
-            item = Person(fw=self, uid=int(v[1]), name=v[3], poster=common.poster_path_to_relative(v[2]))
+            item = Person(fw=self, uid=int(v[1]), name=v[3], poster=common.img_path_to_relative(v[2]))
 
          elif item_type == 't':
             item = Channel(fw=self, uid=int(v[1]), name=v[2])
@@ -124,7 +124,7 @@ class Filmweb:
 
       films = []
       for v in data:
-         films.append(Film(fw=self, name=v[0], year=v[1], rate=v[2], votes=v[3], poster=common.poster_path_to_relative(v[5]), uid=v[6]))
+         films.append(Film(fw=self, name=v[0], year=v[1], rate=v[2], votes=v[3], poster=common.img_path_to_relative(v[5]), uid=v[6]))
 
       return films
 
@@ -137,7 +137,7 @@ class Filmweb:
 
       persons = []
       for v in data:
-         persons.append(Person(fw=self, uid=v[0], name=v[1], poster=common.poster_path_to_relative(v[2])))
+         persons.append(Person(fw=self, uid=v[0], name=v[1], poster=common.img_path_to_relative(v[2])))
 
       return persons
 
@@ -215,7 +215,7 @@ class Filmweb:
          films = []
          for v in day[1]:
             films.append({
-               'film': Film(fw=self, uid=v[0], name=v[1], year=v[2], poster=common.poster_path_to_relative(v[3])),
+               'film': Film(fw=self, uid=v[0], name=v[1], year=v[2], poster=common.img_path_to_relative(v[3])),
                'person_names': [v[4], v[5]]
             })
 
@@ -235,7 +235,7 @@ class Filmweb:
       data = self._request('getBornTodayPersons')
       results = []
       for v in data:
-         results.append(Person(fw=self, uid=v[0], name=v[1], poster=common.poster_path_to_relative(v[2]), date_birth=common.str_to_date(v[3]), date_death=common.str_to_date(v[4])))
+         results.append(Person(fw=self, uid=v[0], name=v[1], poster=common.img_path_to_relative(v[2]), date_birth=common.str_to_date(v[3]), date_death=common.str_to_date(v[4])))
       return results
 
    def get_trailers(self, offset=0, limit=10):
@@ -258,7 +258,7 @@ class Filmweb:
             '720p': v[8]
          }
 
-         film = Film(fw=self, uid=v[2], name=v[0], poster=common.poster_path_to_relative(v[5]))
+         film = Film(fw=self, uid=v[2], name=v[0], poster=common.img_path_to_relative(v[5]))
          results.append(
             Video(fw=self, film=film, date=common.str_to_date(v[1]), img=img, name=v[6], min_age=v[9], vid_uid=vid_uid, vid_urls=vid_urls)
          )
@@ -284,7 +284,7 @@ class Filmweb:
             '720p': v[7]
          }
 
-         film = Film(fw=self, uid=v[2], name=v[0], poster=common.poster_path_to_relative(v[5]))
+         film = Film(fw=self, uid=v[2], name=v[0], poster=common.img_path_to_relative(v[5]))
          results.append(
             Video(fw=self, uid=uid, name=v[6], film=film, date=common.str_to_date(v[1]), img=img, min_age=v[9], vid_urls=vid_urls)
          )
@@ -381,4 +381,4 @@ class Filmweb:
          films[k].rate = v[2]
          films[k].votes = v[3]
          films[k].duration = v[4]
-         films[k].poster = common.poster_path_to_relative(v[5])
+         films[k].poster = common.img_path_to_relative(v[5])
