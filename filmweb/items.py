@@ -588,6 +588,13 @@ class Cinema(Object):
    def __repr__(self):
       return '<Cinema uid: {} name: {}>'.format(self.uid, self.name)
 
+   @property
+   def url(self):
+      if self.name and self.city_name:
+         return '{}/{}/{}-{}'.format(common.URL, self.city_name.replace(' ', '+'), self.name.replace(' ', '+'), self.uid)
+      else:
+         return '{}/entityLink?entityName=cinema&id={}'.format(common.URL, self.uid)
+
    def get_repertoire(self, date):
       """Returns unsorted cinema repertoire.
 
@@ -645,6 +652,13 @@ class User(Object):
       self.birth_date = birth_date
       self.uid_fb = uid_fb
       self.name_full = name_full
+
+   @property
+   def url(self):
+      if self.name:
+         return '{}/user/{}'.format(common.URL, self.name.replace(' ', '+'))
+      else:
+         return '{}/entityLink?entityName=user&id={}'.format(common.URL, self.uid)
 
    def get_info(self):
       """Returns basic info about user and updates object parameters.
