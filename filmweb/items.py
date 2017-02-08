@@ -55,6 +55,30 @@ class Film(Object):
       data = self._request('getFilmDescription', [self.uid])
       return data[0]
 
+   def get_review(self):
+      """Returns film review.
+
+      :return: review
+      :rtype: dict or None
+
+      .. code:: python
+
+         {
+            'title': str(),
+            'content': str(),
+            'author': User(uid, name, img)
+         }
+      """
+      data = self._request('getFilmReview', [self.uid])
+
+      if len(data) >= 5:
+         result = {
+            'title': data[4],
+            'content': data[3],
+            'author': User(fw=self.fw, uid=data[1], name=data[0], img=common.poster_path_to_relative(data[2])),
+         }
+         return result
+
    def get_info(self):
       """Returns informations about film and updates object variables.
 
