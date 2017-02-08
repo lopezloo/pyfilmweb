@@ -134,7 +134,13 @@ class Film(Object):
          }
 
          trailer = Video(
-            fw=self.fw, uid=uid, category='zwiastun', film=self, img=data[12][0], min_age=data[12][4], vid_urls=vid_urls
+            fw=self.fw,
+            uid=uid,
+            category='zwiastun',
+            film=self,
+            img=common.img_path_to_relative(data[12][0]),
+            min_age=data[12][4],
+            vid_urls=vid_urls
          )
 
       result = {
@@ -296,10 +302,18 @@ class Film(Object):
       results = []
       for v in data:
          #img_low = v[0]
-         img = v[1]
+         img = common.img_path_to_relative(v[1])
          uid = common.video_img_url_to_uid(img)
          results.append(
-            Video(fw=self.fw, uid=uid, category='zwiastun', film=self, img=img, vid_urls={'main': v[2]}, min_age=v[3])
+            Video(
+               fw=self.fw,
+               uid=uid,
+               category='zwiastun',
+               film=self,
+               img=img,
+               vid_urls={'main': v[2]},
+               min_age=v[3]
+            )
          )
 
       return results
@@ -309,7 +323,7 @@ class Person(Object):
       self.fw = fw #: :class:`Filmweb` instance
       self.uid = uid
       self.name = name
-      self.poster = poster #: Relative poster path, use get_poster() for absolute path
+      self.poster = poster #: Relative poster path, use :func:`get_poster` for absolute path
       self.rate = rate
       self.votes = votes
       self.date_birth = date_birth
@@ -328,7 +342,7 @@ class Person(Object):
          return '{}/entityLink?entityName={}&id={}'.format(common.URL, self.type, self.uid)
 
    def get_poster(self, size='small'):
-      """Returns absolute URL of specified size poster.
+      """Returns absolute path of specified size poster.
 
       :param str size: poster size (small or tiny)
       :return: URL
@@ -526,7 +540,7 @@ class Channel(Object):
          return '{}/entityLink?entityName={}&id={}'.format(common.URL, self.type, self.uid)
 
    def get_icon(self, size='small'):
-      """Returns absolute URL of specified size icon.
+      """Returns absolute path of specified size icon.
 
       :param str size: icon size (see common.channel_icon_sizes)
       :return: URL
@@ -576,7 +590,7 @@ class Video(Object):
       self.category = category
       self.film = film
       self.date = date
-      self.img = img
+      self.img = img #: Relative thumbnail path, use :func:`get_thumb` for absolute path
       self.name = name
       self.min_age = min_age
       self.vid_urls = vid_urls
@@ -599,6 +613,17 @@ class Video(Object):
       assert size in ['main', '480p', '720p']
       if size in self.vid_urls:
          return self.vid_urls[size]
+
+   def get_thumb(self, size='medium'):
+      """Returns absolute path of specified size thumbnail.
+
+      :param str size: thumbnail size (see common.video_thumb_sizes)
+      :return: URL
+      :rtype: str or None
+      """
+      assert size in common.video_thumb_sizes
+      if self.img:
+         return '{}{}.{}.jpg'.format(common.URL_CDN, self.img, common.video_thumb_sizes[size])
 
 class Cinema(Object):
    def __init__(self, fw, uid, name=None, city_name=None, address=None, coords=None):
@@ -671,7 +696,7 @@ class User(Object):
       self.fw = fw #: :class:`Filmweb` instance
       self.uid = uid
       self.name = name
-      self.img = img #: Relative avatar path, use get_avatar() for absolute path
+      self.img = img #: Relative avatar path, use :func:`get_avatar` for absolute path
       self.sex = sex #: F/M
       self.birth_date = birth_date
       self.uid_fb = uid_fb
@@ -685,7 +710,7 @@ class User(Object):
          return '{}/entityLink?entityName=user&id={}'.format(common.URL, self.uid)
 
    def get_avatar(self, size='big'):
-      """Returns absolute URL of specified size avatar.
+      """Returns absolute path of specified size avatar.
 
       :param str size: poster size (see common.image_sizes)
       :return: URL

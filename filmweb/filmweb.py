@@ -249,7 +249,7 @@ class Filmweb:
       data = self._request('getTrailers', [offset, limit])
       results = []
       for v in data:
-         img = v[3]
+         img = common.img_path_to_relative(v[3])
          uid = common.video_img_url_to_uid(img)
 
          vid_urls = {
@@ -260,7 +260,7 @@ class Filmweb:
 
          film = Film(fw=self, uid=v[2], name=v[0], poster=common.img_path_to_relative(v[5]))
          results.append(
-            Video(fw=self, film=film, date=common.str_to_date(v[1]), img=img, name=v[6], min_age=v[9], vid_uid=vid_uid, vid_urls=vid_urls)
+            Video(fw=self, film=film, date=common.str_to_date(v[1]), img=img, name=v[6], min_age=v[9], uid=uid, vid_urls=vid_urls)
          )
       return results
 
@@ -286,7 +286,16 @@ class Filmweb:
 
          film = Film(fw=self, uid=v[2], name=v[0], poster=common.img_path_to_relative(v[5]))
          results.append(
-            Video(fw=self, uid=uid, name=v[6], film=film, date=common.str_to_date(v[1]), img=img, min_age=v[9], vid_urls=vid_urls)
+            Video(
+               fw=self,
+               uid=uid,
+               name=v[6],
+               film=film,
+               date=common.str_to_date(v[1]),
+               img=common.img_path_to_relative(img),
+               min_age=v[9],
+               vid_urls=vid_urls
+            )
          )
       return results
 
@@ -345,7 +354,7 @@ class Filmweb:
          'videos': []
       }
       for v in data[2:]:
-         img = v[2]
+         img = common.img_path_to_relative(v[2])
          uid = common.video_img_url_to_uid(img)
 
          vid_urls = {

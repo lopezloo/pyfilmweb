@@ -28,6 +28,14 @@ channel_icon_sizes = {
    'big':    2
 }
 
+video_thumb_sizes = {
+   'tiny':   0,
+   'small':  3,
+   'medium': 1,
+   'big':    2,
+   'large':  4
+}
+
 # Film, serial genres
 film_genres = {
    'Akcja' : 28,
@@ -210,7 +218,7 @@ def trailer_url_to_uid(url):
 
 def video_img_url_to_uid(url):
    if url:
-      r = re.search('\.(\d+)\.\d\.', url)
+      r = re.search('\.(\d+)', url)
       if r:
          return int(r.group(1))
       else:
@@ -224,4 +232,4 @@ def sex_id_to_str(uid):
 
 def img_path_to_relative(path):
    if path:
-      return path[:-6]
+      return path[:-6].replace(URL_CDN, '')
