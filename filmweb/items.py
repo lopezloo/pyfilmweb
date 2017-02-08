@@ -898,6 +898,20 @@ class LoggedUser(User):
       self.check_auth()
       self._request('addUserFilmVote', [[film.uid, rate, comment, int(favorite)]], hmethod='POST')
 
+   def set_film_seen_date(self, film, date):
+      """Changes film seen date.
+
+      :param :class:`Film` film: film
+      :param str date: seen date (can be incomplete)
+
+      .. note:
+         * Raises RequestFailed('exc', 'beforePremiere') if date is below film premiere.
+         * Raises RequestFailed('exc', 'futureDate') if date is from future.
+         * Raises RequestFailed('exc', 'unknownVote') if film doesn't have set premiere date.
+      """
+      self.check_auth()
+      self._request('updateUserFilmVoteDate', [film.uid, str(date)], hmethod='POST')
+
    def set_want_to_see(self, film, level=3):
       """Mark film as wanted to see.
 
@@ -906,3 +920,8 @@ class LoggedUser(User):
       """
       self.check_auth()
       self._request('addUserFilmWantToSee', [film.uid, level], hmethod='POST')
+
+   def read_notifications(self):
+      """Marks notifications as read."""
+      self.check_auth()
+      self._request('markNotificationsRead', hmethod='POST')

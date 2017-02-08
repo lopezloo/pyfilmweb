@@ -59,7 +59,7 @@ class Filmweb:
          raise exceptions.RequestFailed('exc', data[1][4:])
 
       # Everything okay, just 0 results
-      if data[1] == 'null':
+      if data[1] == 'null' or data[1] == '':
          return []
 
       if hmethod == 'GET':
