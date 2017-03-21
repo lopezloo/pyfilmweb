@@ -2,7 +2,6 @@
 
 import filmweb
 from . import common, exceptions
-from datetime import datetime
 
 class Object:
    def _request(self, method, params=[], hmethod='GET'):
@@ -100,8 +99,8 @@ class Film(Object):
             'has_description':   bool(),
             'poster_small':      str(),
             'trailer':           Video(uid, category, film, img, min_age, vid_urls),
-            'premiere':          date(),
-            'premiere_local':    date(),
+            'premiere':          str(), # Y-m-d
+            'premiere_local':    str(), # Y-m-d
             'type':              str(),
             'season_count':      int(),
             'episode_count':     int(),
@@ -157,8 +156,8 @@ class Film(Object):
          'has_description':   bool(data[10]),
          'poster_small':      data[11],
          'trailer':           trailer,
-         'premiere':          common.str_to_date(data[13]),
-         'premiere_local':    common.str_to_date(data[14]),
+         'premiere':          data[13],
+         'premiere_local':    data[14],
          'type':              common.get_film_type_name(data[15]),
          'season_count':      data[16],
          'episode_count':     data[17],
@@ -265,7 +264,8 @@ class Film(Object):
          [
             {
                'channel': Channel(uid),
-               'datetime': datetime(),
+               'time': str(), # H:M
+               'date': str(), # Y-m-d
                'uid': int()
             }
          ]
@@ -281,7 +281,8 @@ class Film(Object):
       for v in data:
          results.append({
             'channel': Channel(fw=self.fw, uid=v[1]),
-            'datetime': common.str_to_datetime(v[3]+v[2], '%Y-%m-%d%H:%M'),
+            'time': v[2],
+            'date': v[3],
             'uid': v[4]
          })
 
@@ -372,7 +373,7 @@ class Person(Object):
 
          {
             'name': str(),
-            'birth_date': date(),
+            'birth_date': str(), # Y-m-d
             'birth_place': str(),
             'votes': int(),
             'rate': float(),
@@ -381,7 +382,7 @@ class Person(Object):
             'film_known_for': Film(uid),
             'sex': str(), # F/M
             'name_full': str(),
-            'death_date': date(),
+            'death_date': str(), # Y-m-d
             'height': int(),
          }
       """
@@ -389,7 +390,7 @@ class Person(Object):
 
       result = {
          'name': data[0],
-         'birth_date': common.str_to_date(data[1]),
+         'birth_date': data[1],
          'birth_place': data[2],
          'votes': data[3],
          'rate': data[4],
@@ -758,7 +759,7 @@ class User(Object):
          [
             {
                'film': Film(uid, type),
-               'date': date(),
+               'date': str(), # Y-m-d
                'rate': int(),
                'favorite': bool(),
                'comment': str()
@@ -779,7 +780,7 @@ class User(Object):
       for v in data[1:]:
          results.append({
             'film': Film(fw=self.fw, uid=v[0], type=common.get_film_type_name(v[5])),
-            'date': common.str_to_date(v[1]),
+            'date': v[1],
             'rate': v[2],
             'favorite': bool(v[3]),
             'comment': v[4]
@@ -795,7 +796,7 @@ class User(Object):
          [
             {
                'film': Film(uid, type),
-               'datetime': datetime(),
+               'timestamp': int(), # in ms!
                'level': int() # 1-5
             }
          ]
@@ -814,7 +815,7 @@ class User(Object):
       for v in data[1:]:
          results.append({
             'film': Film(fw=self.fw, uid=v[0], type=common.get_film_type_name(v[3])),
-            'datetime': datetime.fromtimestamp(v[1]/1000), # WTF
+            'timestamp': v[1],
             'level': v[2]
          })
 
@@ -860,7 +861,7 @@ class LoggedUser(User):
       for v in data[1:]:
          results.append({
             'person': Person(fw=self.fw, uid=v[0]),
-            'datetime': datetime.fromtimestamp(v[1]/1000),
+            'timestamp': v[1], # in ms
             'rate': v[2],
             'favorite': bool(v[3])
          })

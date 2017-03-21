@@ -195,7 +195,7 @@ class Filmweb:
 
          [
             {
-               'date': date(),
+               'date': str(),
                'films': [
                   {
                      'film': Film(uid, name, year, poster),
@@ -220,7 +220,7 @@ class Filmweb:
             })
 
          result = {
-            'date': common.str_to_date(day[0]),
+            'date': day[0],
             'films': films
          }
          results.append(result)
@@ -235,7 +235,7 @@ class Filmweb:
       data = self._request('getBornTodayPersons')
       results = []
       for v in data:
-         results.append(Person(fw=self, uid=v[0], name=v[1], poster=common.img_path_to_relative(v[2]), date_birth=common.str_to_date(v[3]), date_death=common.str_to_date(v[4])))
+         results.append(Person(fw=self, uid=v[0], name=v[1], poster=common.img_path_to_relative(v[2]), date_birth=v[3], date_death=v[4]))
       return results
 
    def get_trailers(self, offset=0, limit=10):
@@ -260,7 +260,7 @@ class Filmweb:
 
          film = Film(fw=self, uid=v[2], name=v[0], poster=common.img_path_to_relative(v[5]))
          results.append(
-            Video(fw=self, film=film, date=common.str_to_date(v[1]), img=img, name=v[6], min_age=v[9], uid=uid, vid_urls=vid_urls)
+            Video(fw=self, film=film, date=v[1], img=img, name=v[6], min_age=v[9], uid=uid, vid_urls=vid_urls)
          )
       return results
 
@@ -291,7 +291,7 @@ class Filmweb:
                uid=uid,
                name=v[6],
                film=film,
-               date=common.str_to_date(v[1]),
+               date=v[1],
                img=common.img_path_to_relative(img),
                min_age=v[9],
                vid_urls=vid_urls
@@ -365,7 +365,7 @@ class Filmweb:
 
         #unk=data[6] # int
          result['videos'].append({
-            Video(fw=self, uid=uid, category=category, name=v[0], date=common.str_to_date(v[1]), img=img, min_age=v[7], vid_urls=vid_urls)
+            Video(fw=self, uid=uid, category=category, name=v[0], date=v[1], img=img, min_age=v[7], vid_urls=vid_urls)
          })
 
       return result

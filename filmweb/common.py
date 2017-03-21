@@ -195,19 +195,6 @@ def get_film_type_id(film_name):
 def get_film_type_name(film_id):
    return film_types[film_id]
 
-def str_to_date(s, formt='%Y-%m-%d'):
-   if s:
-      d = str_to_datetime(s, formt)
-      return d.date() if d else None
-
-def str_to_datetime(s, formt='%Y-%m-%d'):
-   if s:
-      try:
-         return datetime.strptime(s, formt)
-      except TypeError:
-         # http://forum.kodi.tv/showthread.php?tid=112916
-         return datetime(*(time.strptime(s, formt)[0:6]))
-
 def trailer_url_to_uid(url):
    if url:
       r = re.match('http:\/\/mm.filmweb.pl\/(.*)\..*\.mp4', url)
