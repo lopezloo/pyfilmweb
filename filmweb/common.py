@@ -174,6 +174,11 @@ def get_role_type_id(role_name):
    if role_name in person_role_types:
       return person_role_types[role_name]
 
+def get_role_type_str(rid):
+   for k, v in person_role_types.items():
+      if v == rid:
+         return k
+
 image_sizes = {
    'small': 0,
    'big': 1,

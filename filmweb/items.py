@@ -186,7 +186,7 @@ class Film(Object):
       return result
 
    def get_persons(self, role_type, offset=0):
-      """Returns persons which has role in this film.
+      """Returns persons witch specified role type in this film.
 
       :param str role_type: see common.person_role_types
       :param int offset: start position
@@ -215,6 +215,36 @@ class Film(Object):
             'person': Person(fw=self.fw, uid=v[0], name=v[3], poster=common.img_path_to_relative(v[4])),
             'role': v[1],
             'role_extra_info': v[2]
+         })
+      return results
+
+   def get_persons_lead(self):
+      """Returns film lead persons.
+
+      :return: list
+      :rtype: list of dicts
+
+      .. code:: python
+
+         [
+            {
+               'person': Person(uid, name, poster),
+               'role_type': str(), # see common.person_role_types
+               'role': str(),
+               'role_extra_info': str()
+            }
+         ]
+      """
+      limit = 10 # ignored
+      data = self._request('getFilmPersonsLead', [self.uid, limit])
+
+      results = []
+      for v in data:
+         results.append({
+            'person': Person(fw=self.fw, uid=v[1], name=v[4], poster=common.img_path_to_relative(v[5])),
+            'role_type': common.get_role_type_str(v[0]),
+            'role': v[2],
+            'role_extra_info': v[3]
          })
       return results
 
