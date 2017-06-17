@@ -186,7 +186,7 @@ class Film(Object):
       return result
 
    def get_persons(self, role_type, offset=0):
-      """Returns persons witch specified role type in this film.
+      """Returns persons with specified role type in this film.
 
       :param str role_type: see common.person_role_types
       :param int offset: start position
@@ -797,8 +797,8 @@ class User(Object):
          ]
 
       .. note::
-         * This user need to have public votes or be friend with authenticated user. Gonna raise :func:`exceptions.RequestFailed` ('exc', 'PermissionDeniedException') otherwise.
-         * This doesn't result film name. See :func:`Filmweb.update_films_info`
+         * This user need to have public votes or be authenticated user friend. Raises :func:`exceptions.RequestFailed` ('exc', 'PermissionDeniedException') otherwise.
+         * This doesn't return film name. See :func:`Filmweb.update_films_info`
 
       """
       self.check_auth()
@@ -832,8 +832,8 @@ class User(Object):
          ]
 
       .. note::
-         * This user needs to be friend with authenticated user. Gonna raise :func:`exceptions.RequestFailed` ('exc', 'PermissionDeniedException') otherwise.
-         * This doesn't result film name. Use :func:`Filmweb.update_films_info`.
+         * This user needs to be authenticated user friend. Raises :func:`exceptions.RequestFailed` ('exc', 'PermissionDeniedException') otherwise.
+         * This doesn't return film name. Use :func:`Filmweb.update_films_info`.
 
       """
       self.check_auth()
