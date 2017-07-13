@@ -2,7 +2,7 @@
 pyfilmweb
 =========
 .. image:: https://readthedocs.org/projects/pyfilmweb/badge/
-    :target: http://pyfilmweb.readthedocs.org/
+    :target: https://pyfilmweb.readthedocs.org/
     :alt: Documentation Status
 
 Python package for Filmweb unofficial mobile API.
@@ -38,4 +38,4 @@ Example
   print('Title: {} ({}) Rate: {} ({} votes) Description: {}'.format(item.name, item.year, item.rate, item.votes, info['description_short']))
 
 
-For more, see full documentation - http://pyfilmweb.readthedocs.io/.
+For more, see full documentation - https://pyfilmweb.readthedocs.io/.
