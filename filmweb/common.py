@@ -205,16 +205,12 @@ def trailer_url_to_uid(url):
       r = re.match('http:\/\/mm.filmweb.pl\/(.*)\..*\.mp4', url)
       if r:
          return int(r.group(1))
-      else:
-         print('Unknown trailer url: {}'.format(url))
 
 def video_img_url_to_uid(url):
    if url:
       r = re.search('\.(\d+)', url)
       if r:
          return int(r.group(1))
-      else:
-         print('Unknown img url: {}'.format(url))
 
 def sex_id_to_str(uid):
    if uid == 1:
