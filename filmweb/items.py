@@ -372,7 +372,7 @@ class Person(Object):
    @property
    def url(self):
       if self.name:
-         return u'{}/person/{}'.format(common.URL, self.name.replace(' ', '.').replace('?', ''))
+         return u'{}/person/{}-{}'.format(common.URL, self.name.replace(' ', '+').replace('?', ''), self.uid)
       else:
          return u'{}/entityLink?entityName={}&id={}'.format(common.URL, self.type, self.uid)
 
