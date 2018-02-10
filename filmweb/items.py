@@ -25,14 +25,18 @@ class Film(Object):
       self.duration = duration #: Duration in minutes.
 
    def __repr__(self):
-      return '<Film uid: {} type: {} name: {}>'.format(self.uid, self.type, self.name)
+      return '<Film uid: {} type: {} name: {}>'.format(
+         self.uid,
+         self.type,
+         self.name.encode('ascii', 'replace') if self.name else None
+      )
 
    @property
    def url(self):
       if self.name and self.year:
-         return '{}/{}/{}-{}-{}'.format(common.URL, self.type, self.name.replace(' ', '+'), self.year, self.uid)
+         return u'{}/{}/{}-{}-{}'.format(common.URL, self.type, self.name.replace(' ', '+'), self.year, self.uid)
       else:
-         return '{}/entityLink?entityName={}&id={}'.format(common.URL, self.type, self.uid)
+         return u'{}/entityLink?entityName={}&id={}'.format(common.URL, self.type, self.uid)
 
    def get_poster(self, size='small'):
       """Returns absolute path of specified size poster.
@@ -43,7 +47,7 @@ class Film(Object):
       """
       assert isinstance(size, str)
       if self.poster:
-         return '{}/po{}.{}.jpg'.format(common.URL_CDN, self.poster, common.poster_sizes[size])
+         return u'{}/po{}.{}.jpg'.format(common.URL_CDN, self.poster, common.poster_sizes[size])
 
    def get_description(self):
       """Returns full film description.
@@ -368,9 +372,9 @@ class Person(Object):
    @property
    def url(self):
       if self.name:
-         return '{}/person/{}'.format(common.URL, self.name.replace(' ', '.').replace('?', ''))
+         return u'{}/person/{}'.format(common.URL, self.name.replace(' ', '.').replace('?', ''))
       else:
-         return '{}/entityLink?entityName={}&id={}'.format(common.URL, self.type, self.uid)
+         return u'{}/entityLink?entityName={}&id={}'.format(common.URL, self.type, self.uid)
 
    def get_poster(self, size='small'):
       """Returns absolute path of specified size poster.
@@ -381,7 +385,7 @@ class Person(Object):
       """
       assert size in ['small', 'tiny']
       if self.poster:
-         return '{}/p{}.{}.jpg'.format(common.URL_CDN, self.poster, 0 if size == 'tiny' else 1)
+         return u'{}/p{}.{}.jpg'.format(common.URL_CDN, self.poster, 0 if size == 'tiny' else 1)
 
    def get_biography(self):
       """Returns full person biography.
@@ -548,7 +552,7 @@ class Image(Object):
       :return: URL
       :rtype: str
       """
-      return '{}/ph{}.{}.jpg'.format(common.URL_CDN, self.path, common.image_sizes[size])
+      return u'{}/ph{}.{}.jpg'.format(common.URL_CDN, self.path, common.image_sizes[size])
 
 class Channel(Object):
    def __init__(self, fw, uid, name=None):
@@ -557,7 +561,10 @@ class Channel(Object):
       self.name = name
 
    def __repr__(self):
-      return '<Channel uid: {} name: {}>'.format(self.uid, self.name)
+      return '<Channel uid: {} name: {}>'.format(
+         self.uid,
+         self.name.encode('ascii', 'replace') if self.name else None
+      )
 
    @property
    def type(self):
@@ -566,9 +573,9 @@ class Channel(Object):
    @property
    def url(self):
       if self.name:
-         return '{}/program-tv/{}'.format(common.URL, self.name.replace(' ', '+'))
+         return u'{}/program-tv/{}'.format(common.URL, self.name.replace(' ', '+'))
       else:
-         return '{}/entityLink?entityName={}&id={}'.format(common.URL, self.type, self.uid)
+         return u'{}/entityLink?entityName={}&id={}'.format(common.URL, self.type, self.uid)
 
    def get_icon(self, size='small'):
       """Returns absolute path of specified size icon.
@@ -578,7 +585,7 @@ class Channel(Object):
       :rtype: str
       """
       assert size in common.channel_icon_sizes
-      return '{}/channels/{}.{}.png'.format(common.URL_CDN, self.uid, common.channel_icon_sizes[size])
+      return u'{}/channels/{}.{}.png'.format(common.URL_CDN, self.uid, common.channel_icon_sizes[size])
 
    def get_schedule(self, date):
       """Returns channel schedule for given date.
@@ -627,12 +634,16 @@ class Video(Object):
       self.vid_urls = vid_urls
 
    def __repr__(self):
-      return '<Video uid: {} category: {} name: {}>'.format(self.uid, self.category, self.name)
+      return '<Video uid: {} category: {} name: {}>'.format(
+         self.uid,
+         self.category,
+         self.name.encode('ascii', 'replace') if self.name else None
+      )
 
    @property
    def url(self):
       if self.uid:
-         return '{}/video/{}/{}-{}'.format(common.URL, self.category or 'zwiastun', self.name.replace(' ', '+') or 'A', self.uid)
+         return u'{}/video/{}/{}-{}'.format(common.URL, self.category or 'zwiastun', self.name.replace(' ', '+') or 'A', self.uid)
 
    def get_video(self, size='main'):
       """Returns absolute path of specified quality video.
@@ -654,7 +665,7 @@ class Video(Object):
       """
       assert size in common.video_thumb_sizes
       if self.img:
-         return '{}{}.{}.jpg'.format(common.URL_CDN, self.img, common.video_thumb_sizes[size])
+         return u'{}{}.{}.jpg'.format(common.URL_CDN, self.img, common.video_thumb_sizes[size])
 
 class Cinema(Object):
    def __init__(self, fw, uid, name=None, city_name=None, address=None, coords=None):
@@ -666,14 +677,17 @@ class Cinema(Object):
       self.coords = coords
 
    def __repr__(self):
-      return '<Cinema uid: {} name: {}>'.format(self.uid, self.name)
+      return u'<Cinema uid: {} name: {}>'.format(
+         self.uid,
+         self.name.encode('ascii', 'replace') if self.name else None
+      )
 
    @property
    def url(self):
       if self.name and self.city_name:
-         return '{}/{}/{}-{}'.format(common.URL, self.city_name.replace(' ', '+'), self.name.replace(' ', '+'), self.uid)
+         return u'{}/{}/{}-{}'.format(common.URL, self.city_name.replace(' ', '+'), self.name.replace(' ', '+'), self.uid)
       else:
-         return '{}/entityLink?entityName=cinema&id={}'.format(common.URL, self.uid)
+         return u'{}/entityLink?entityName=cinema&id={}'.format(common.URL, self.uid)
 
    def get_repertoire(self, date):
       """Returns unsorted cinema repertoire.
@@ -736,9 +750,9 @@ class User(Object):
    @property
    def url(self):
       if self.name:
-         return '{}/user/{}'.format(common.URL, self.name.replace(' ', '+'))
+         return u'{}/user/{}'.format(common.URL, self.name.replace(' ', '+'))
       else:
-         return '{}/entityLink?entityName=user&id={}'.format(common.URL, self.uid)
+         return u'{}/entityLink?entityName=user&id={}'.format(common.URL, self.uid)
 
    def get_avatar(self, size='big'):
       """Returns absolute path of specified size avatar.
@@ -749,7 +763,7 @@ class User(Object):
       """
       assert size in common.image_sizes
       if self.img:
-         return '{}/u{}.{}.jpg'.format(common.URL_CDN, self.img, common.image_sizes[size])
+         return u'{}/u{}.{}.jpg'.format(common.URL_CDN, self.img, common.image_sizes[size])
 
    def get_info(self):
       """Returns basic info about user and updates object parameters.
