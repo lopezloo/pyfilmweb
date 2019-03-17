@@ -25,9 +25,10 @@ class Film(Object):
       self.duration = duration #: Duration in minutes.
 
    def __repr__(self):
-      return '<Film uid: {} type: {} name: {}>'.format(
+      return '<Film uid: {} type: {} poster: {} name: {}>'.format(
          self.uid,
          self.type,
+         self.poster,
          self.name.encode('ascii', 'replace') if self.name else None
       )
 
@@ -147,6 +148,7 @@ class Film(Object):
          )
 
       result = {
+         'uid' :              self.uid,
          'name':              data[0],
          'name_org':          data[1],
          'rate':              data[2],
@@ -188,6 +190,7 @@ class Film(Object):
          self.poster = common.img_path_to_relative(result['poster_small'])
 
       return result
+      
 
    def get_persons(self, role_type, offset=0):
       """Returns persons with specified role type in this film.
@@ -364,6 +367,12 @@ class Person(Object):
       self.date_birth = date_birth
       self.date_death = date_death
       self.sex = sex #: F/M
+
+   def __repr__(self):
+      return '<Person uid: {} name: {}>'.format(
+         self.uid,
+         self.name.encode('ascii', 'replace') if self.name else None
+      )
 
    @property
    def type(self):
