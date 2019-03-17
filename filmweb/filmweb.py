@@ -115,6 +115,36 @@ class Filmweb:
 
       return items
 
+   def get_film_by_id(self, uids):
+      """Get movie from Filmweb database by id.
+
+      :param int uids: Film id
+      :return: Object
+      :rtype: :class:`Film`
+
+      :Example:
+
+      .. code:: python
+
+         fw = Filmweb()
+         item = fw.get_movie_by_id(671074)
+         if item is not None:
+            print(item)
+      """
+      data = self._request('getFilmInfoFull', [uids])
+
+      item = None
+
+      try:
+         item_type = common.get_film_type_name(data[15])
+         if item_type == 'film' or item_type == 'videogame' or item_type == 'serial':
+            item = Film(fw=self, uid=uids, type=item_type, name=data[0], poster=common.img_path_to_relative(data[11]), name_org=data[1], year=data[5])
+      except:
+         pass
+         
+      return item
+
+
    def get_popular_films(self):
       """Returns 100 popular films.
 
