@@ -182,6 +182,7 @@ class Film(Object):
       # Update object
       self.type = result['type']
       self.name = result['name']
+      self.name_org = result['name_org']
       self.year = result['year']
       self.rate = result['rate']
       self.votes = result['votes']
@@ -755,6 +756,12 @@ class User(Object):
       self.birth_date = birth_date
       self.uid_fb = uid_fb
       self.name_full = name_full
+
+   def __repr__(self):
+      return '<User uid: {} name: {}>'.format(
+         self.uid,
+         self.name.encode('ascii', 'replace') if self.name else None
+      )
 
    @property
    def url(self):
