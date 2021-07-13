@@ -6,7 +6,7 @@ pyfilmweb
     :alt: Documentation Status
 
 ______
-**NOTE: _This package doesn't anymore_.** Sadly Filmweb decided to discontinue their app and shut down API.
+**NOTE: This package doesn't anymore.** Sadly Filmweb decided to discontinue their app and shut down API.
 ______
 
 Python package for Filmweb unofficial mobile API.
