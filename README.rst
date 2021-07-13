@@ -1,12 +1,13 @@
-This package is not working anymore. Sadly Filmweb decided to discontinue their app and shut down API.
-Source: https://www.my-mobile.pl/index.php/2020/05/16/aplikacja-filmweb-problem-koniec-brak-nie-ma-na-android-ios-w-sklepie-google-play-ios/
-
 =========
 pyfilmweb
 =========
 .. image:: https://readthedocs.org/projects/pyfilmweb/badge/
     :target: https://pyfilmweb.readthedocs.org/
     :alt: Documentation Status
+
+______
+**NOTE: _This package doesn't anymore_.** Sadly Filmweb decided to discontinue their app and shut down API.
+______
 
 Python package for Filmweb unofficial mobile API.
 
