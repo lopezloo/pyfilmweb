@@ -18,8 +18,8 @@ Features
 * access to movies, games, TV shows, persons, TV channels, cinemas
 * access to trailers and Filmweb productions
 * access to user features
-* no scraping - uses API, which is more fast and reliable
-* support for python 2.7 & 3.4+
+* no scraping - uses API, which is faster and more reliable
+* support for Python 2.7 & 3.4+
 
 ============
 Installation
