@@ -486,7 +486,7 @@ class Person(Object):
             'role_extra_info': str()
          }
       """
-      assert isinstance(offset, limit)
+      assert isinstance(limit, int)
       data = self._request('getPersonFilmsLead', [self.uid, limit])
 
       results = []
