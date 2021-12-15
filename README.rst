@@ -9,7 +9,7 @@ ______
 **NOTE: This package doesn't work anymore.** Sadly Filmweb decided to discontinue their app and shut down API.
 ______
 
-Python package for Filmweb unofficial mobile API.
+Python package for Filmweb unofficial API.
 
 ========
 Features
